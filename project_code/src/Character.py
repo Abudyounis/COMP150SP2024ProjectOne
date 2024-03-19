@@ -1,5 +1,5 @@
 from project_code.src.Statistic import *
-
+#I have no time to work on this project today
 
 class Character:
 
