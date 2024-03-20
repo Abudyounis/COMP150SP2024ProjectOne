@@ -1,5 +1,6 @@
 from project_code.src.Statistic import *
 #I have no time to work on this project today
+#worked with partner and planned, downloaded VScode
 
 class Character:
 
