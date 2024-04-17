@@ -21,6 +21,9 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
+// Game frame update rate counter
+var updateCounter = 0;
+
 function startGame() {
   if (requestAnimationFrameId) {
     cancelAnimationFrame(requestAnimationFrameId);
@@ -36,8 +39,14 @@ function startGame() {
   apple.x = getRandomInt(0, 25) * grid;
   apple.y = getRandomInt(0, 25) * grid;
 
+  updateCounter = 0;  // Reset the update counter
+
   function loop() {
     requestAnimationFrameId = requestAnimationFrame(loop);
+    if (++updateCounter < 10) {  // Adjust this value to slow down or speed up the snake
+      return;
+    }
+    updateCounter = 0;
     updateGame();
   }
 
@@ -47,7 +56,6 @@ function startGame() {
 }
 
 function updateGame() {
-  // slow game loop to 15 fps instead of 60 (60/15 = 4)
   context.clearRect(0, 0, canvas.width, canvas.height);
 
   // move snake
@@ -115,6 +123,10 @@ document.getElementById('resumeButton').addEventListener('click', function() {
   if (!requestAnimationFrameId) {
     function resumeLoop() {
       requestAnimationFrameId = requestAnimationFrame(resumeLoop);
+      if (++updateCounter < 10) {
+        return;
+      }
+      updateCounter = 0;
       updateGame();
     }
     resumeLoop();
@@ -134,7 +146,7 @@ document.addEventListener('keydown', function(e) {
   } else if (e.which === 39 && snake.dx === 0) {
     snake.dx = grid;
     snake.dy = 0;
-  } else if (e.which === 40 && snake.dy === 0) {
+  } else if (e.which === 40 and snake.dy === 0) {
     snake.dy = grid;
     snake.dx = 0;
   }
