@@ -3,26 +3,36 @@ var context = canvas.getContext('2d');
 var grid = 16;
 var requestAnimationFrameId = null;
 
+// Initialize snake and apple outside of startGame to be globally accessible
+var snake = {
+  x: 160,
+  y: 160,
+  dx: grid, // moving right
+  dy: 0,
+  cells: [],
+  maxCells: 4
+};
+var apple = {
+  x: 320,
+  y: 320
+};
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
 function startGame() {
+  // Reset snake and apple positions and properties for game restart
+  snake.x = 160;
+  snake.y = 160;
+  snake.dx = grid;
+  snake.dy = 0;
+  snake.cells = [];
+  snake.maxCells = 4;
+  apple.x = getRandomInt(0, 25) * grid;
+  apple.y = getRandomInt(0, 25) * grid;
+
   var count = 0;
-  
-  var snake = {
-    x: 160,
-    y: 160,
-    dx: grid, // moving right
-    dy: 0,
-    cells: [],
-    maxCells: 4
-  };
-
-  var apple = {
-    x: 320,
-    y: 320
-  };
-
-  function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-  }
 
   function loop() {
     requestAnimationFrameId = requestAnimationFrame(loop);
@@ -45,7 +55,7 @@ function startGame() {
     } else if (snake.x >= canvas.width) {
       snake.x = 0;
     }
-  
+
     // wrap snake position vertically on edge of screen
     if (snake.y < 0) {
       snake.y = canvas.height - grid;
@@ -66,7 +76,7 @@ function startGame() {
     // draw snake
     context.fillStyle = 'green';
     snake.cells.forEach(function(cell, index) {
-      context.fillRect(cell.x, cell.y, grid-1, grid-1);  
+      context.fillRect(cell.x, cell.y, grid-1, grid-1);
 
       // snake eating apple
       if (cell.x === apple.x && cell.y === apple.y) {
@@ -78,14 +88,8 @@ function startGame() {
       // check collision with all cells after this one
       for (var i = index + 1; i < snake.cells.length; i++) {
         if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-          snake.x = 160;
-          snake.y = 160;
-          snake.cells = [];
-          snake.maxCells = 4;
-          snake.dx = grid;
-          snake.dy = 0;
-          apple.x = getRandomInt(0, 25) * grid;
-          apple.y = getRandomInt(0, 25) * grid;
+          // Reset game
+          startGame();  // Restart the game if snake collides with itself
         }
       }
     });
@@ -104,7 +108,7 @@ document.getElementById('startButton').addEventListener('click', function() {
 });
 
 document.addEventListener('keydown', function(e) {
-  // movement key controls
+  // prevent snake from backtracking on itself
   if (e.which === 37 && snake.dx === 0) {
     snake.dx = -grid;
     snake.dy = 0;
