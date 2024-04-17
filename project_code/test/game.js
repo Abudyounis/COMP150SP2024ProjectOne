@@ -4,46 +4,39 @@ var grid = 16;
 var requestAnimationFrameId = null;
 
 // Initialize snake and apple to be globally accessible
-var snake = {
-  x: 160,
-  y: 160,
-  dx: grid, // moving right
-  dy: 0,
-  cells: [],
-  maxCells: 4
-};
-var apple = {
-  x: 320,
-  y: 320
-};
+var snake;
+var apple;
+var updateCounter;
+
+function initGame() {
+  snake = {
+    x: 160,
+    y: 160,
+    dx: grid, // moving right
+    dy: 0,
+    cells: [],
+    maxCells: 4
+  };
+  apple = {
+    x: getRandomInt(0, 25) * grid,
+    y: getRandomInt(0, 25) * grid
+  };
+  updateCounter = 0;
+}
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-// Game frame update rate counter
-var updateCounter = 0;
-
 function startGame() {
+  initGame(); // Initialize or reset game state
   if (requestAnimationFrameId) {
-    cancelAnimationFrame(requestAnimationFrameId);
+    cancelAnimationFrame(requestAnimationFrameId); // Ensure no old game loops are running
   }
-
-  // Reset snake and apple positions and properties for game restart
-  snake.x = 160;
-  snake.y = 160;
-  snake.dx = grid;
-  snake.dy = 0;
-  snake.cells = [];
-  snake.maxCells = 4;
-  apple.x = getRandomInt(0, 25) * grid;
-  apple.y = getRandomInt(0, 25) * grid;
-
-  updateCounter = 0;  // Reset the update counter
 
   function loop() {
     requestAnimationFrameId = requestAnimationFrame(loop);
-    if (++updateCounter < 10) {  // Adjust this value to slow down or speed up the snake
+    if (++updateCounter < 10) {  // Slow down game update frequency
       return;
     }
     updateCounter = 0;
@@ -58,52 +51,35 @@ function startGame() {
 function updateGame() {
   context.clearRect(0, 0, canvas.width, canvas.height);
 
-  // move snake
+  // Snake movement and boundary collision logic
   snake.x += snake.dx;
   snake.y += snake.dy;
+  snake.x = snake.x >= canvas.width ? 0 : snake.x < 0 ? canvas.width - grid : snake.x;
+  snake.y = snake.y >= canvas.height ? 0 : snake.y < 0 ? canvas.height - grid : snake.y;
 
-  // wrap snake position horizontally on edge of screen
-  if (snake.x < 0) {
-    snake.x = canvas.width - grid;
-  } else if (snake.x >= canvas.width) {
-    snake.x = 0;
-  }
-
-  // wrap snake position vertically on edge of screen
-  if (snake.y < 0) {
-    snake.y = canvas.height - grid;
-  } else if (snake.y >= canvas.height) {
-    snake.y = 0;
-  }
-
-  // keep track of where snake has been
+  // Track snake cells and remove tail
   snake.cells.unshift({x: snake.x, y: snake.y});
   if (snake.cells.length > snake.maxCells) {
     snake.cells.pop();
   }
 
-  // draw apple
+  // Draw apple
   context.fillStyle = 'red';
   context.fillRect(apple.x, apple.y, grid-1, grid-1);
 
-  // draw snake
+  // Draw snake
   context.fillStyle = 'green';
   snake.cells.forEach(function(cell, index) {
     context.fillRect(cell.x, cell.y, grid-1, grid-1);
-
-    // snake eating apple
+    // Check for apple consumption
     if (cell.x === apple.x && cell.y === apple.y) {
       snake.maxCells++;
       apple.x = getRandomInt(0, 25) * grid;
       apple.y = getRandomInt(0, 25) * grid;
     }
-
-    // check collision with all cells after this one
-    for (var i = index + 1; i < snake.cells.length; i++) {
-      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-        startGame();  // Restart the game if snake collides with itself
-        return; // Exit the current animation frame loop to prevent further execution after restart
-      }
+    // Check for collisions with self
+    if (index !== 0 && cell.x === snake.cells[0].x && cell.y === snake.cells[0].y) {
+      startGame(); // Restart the game if collision detected
     }
   });
 }
@@ -121,22 +97,11 @@ document.getElementById('pauseButton').addEventListener('click', function() {
 
 document.getElementById('resumeButton').addEventListener('click', function() {
   if (!requestAnimationFrameId) {
-    function resumeLoop() {
-      requestAnimationFrameId = requestAnimationFrame(resumeLoop);
-      if (++updateCounter < 10) {
-        return;
-      }
-      updateCounter = 0;
-      updateGame();
-    }
-    resumeLoop();
-    document.getElementById('resumeButton').style.display = 'none';
-    document.getElementById('pauseButton').style.display = 'inline';
+    startGame(); // Resume the game from the current state
   }
 });
 
 document.addEventListener('keydown', function(e) {
-  // Prevent snake from backtracking on itself, and allow changing direction only if it's not currently moving in the opposite direction
   if (e.which === 37 && snake.dx === 0) {
     snake.dx = -grid;
     snake.dy = 0;
@@ -146,7 +111,7 @@ document.addEventListener('keydown', function(e) {
   } else if (e.which === 39 && snake.dx === 0) {
     snake.dx = grid;
     snake.dy = 0;
-  } else if (e.which === 40 and snake.dy === 0) {
+  } else if (e.which === 40 && snake.dy === 0) {
     snake.dy = grid;
     snake.dx = 0;
   }
