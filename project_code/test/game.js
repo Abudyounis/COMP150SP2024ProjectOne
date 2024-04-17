@@ -39,7 +39,7 @@ function startGame() {
 
   function loop() {
     requestAnimationFrameId = requestAnimationFrame(loop);
-    if (++frameCounter >= 10) {  // Update snake position every 10 frames
+    if (++frameCounter >= 15) {  // Update snake position every 10 frames
       updateGame();
       frameCounter = 0;  // Reset counter after update
     }
