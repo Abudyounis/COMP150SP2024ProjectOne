@@ -1,1 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Interface</title>
+</head>
+<body>
+    <h1>Game Interface</h1>
+    <button onclick="startGame()">Start Game</button>
+    <div id="gameOutput"></div>
+
+    <script>
+        function startGame() {
+            fetch('/start_game', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('gameOutput').innerHTML = data.message;
+                    // Additional logic to handle further game actions
+                });
+        }
+    </script>
+</body>
+</html>
 
