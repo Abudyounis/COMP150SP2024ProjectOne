@@ -195,6 +195,7 @@ def perform_action(game_state, action_data):
     # Add more actions as needed
 
     return "Action not recognized"
+ """
 @app.route('/action', methods=['POST'])
 def action():
     if 'game' in session:
@@ -202,7 +203,7 @@ def action():
         response = game.perform_action(session['game'], action_data)
         return jsonify({'message': 'Action performed', 'result': response})
     return jsonify({'error': 'No game started'}), 400
-
+"""
 
 def init_game():
     # Initialize the game with one or more characters
