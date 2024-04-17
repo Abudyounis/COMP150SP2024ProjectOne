@@ -187,6 +187,19 @@ def azure_dragon_encounter(character):
     except ValueError:
         print("Invalid input. Please enter a number between 1 and 5.")
 
+def init_game():
+    # Initialize the game with one or more characters
+    player_name = "Hero"  # Example player name, could be dynamic based on user input from web
+    character = Character(player_name)
+    return {'character': character}
+def perform_action(game_state, action):
+    # Placeholder for action handling logic
+    if action == 'explore':
+        # Assume exploring always leads to the blacksmith for simplification
+        blacksmith_event(game_state['character'])
+    elif action == 'rest':
+        game_state['character'].rest()
+    return f"{game_state['character'].name} performed the action: {action}"
 
 def blacksmith_event(character):
     print(f"Entering the blacksmith's forge, {character.name} is greeted by the heat of blazing fires and the sound of hammering.")
@@ -362,4 +375,5 @@ def start_game():
 
 
 if __name__ == "__main__":
-    start_game()
+    # Disable direct execution since we are now using this module with Flask
+    print("This module is intended to be used with a Flask application.")
