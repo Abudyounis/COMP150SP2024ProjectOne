@@ -22,6 +22,11 @@ function getRandomInt(min, max) {
 }
 
 function startGame() {
+  // Cancel any existing animation frame to avoid speedup issues
+  if (requestAnimationFrameId) {
+    cancelAnimationFrame(requestAnimationFrameId);
+  }
+
   // Reset snake and apple positions and properties for game restart
   snake.x = 160;
   snake.y = 160;
@@ -90,6 +95,7 @@ function startGame() {
         if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
           // Reset game
           startGame();  // Restart the game if snake collides with itself
+          return; // Exit the current animation frame loop to prevent further execution after restart
         }
       }
     });
@@ -101,14 +107,11 @@ function startGame() {
 
 // Event listeners for the game
 document.getElementById('startButton').addEventListener('click', function() {
-  if (requestAnimationFrameId) {
-    cancelAnimationFrame(requestAnimationFrameId);
-  }
   startGame();
 });
 
 document.addEventListener('keydown', function(e) {
-  // prevent snake from backtracking on itself
+  // Prevent snake from backtracking on itself, and allow changing direction only if it's not currently moving in the opposite direction
   if (e.which === 37 && snake.dx === 0) {
     snake.dx = -grid;
     snake.dy = 0;
