@@ -39,7 +39,7 @@ function startGame() {
 
   function loop() {
     requestAnimationFrameId = requestAnimationFrame(loop);
-    if (++frameCounter >= 4) {  // Update snake position every 10 frames
+    if (++frameCounter >= 5) {  // Update snake position every 5 frames
       updateGame();
       frameCounter = 0;  // Reset counter after update
     }
@@ -118,7 +118,7 @@ document.getElementById('resumeButton').addEventListener('click', function() {
   if (!requestAnimationFrameId) {
     function resumeLoop() {
       requestAnimationFrameId = requestAnimationFrame(resumeLoop);
-      if (++frameCounter >= 10) {
+      if (++frameCounter >= 5) {
         updateGame();
         frameCounter = 0;
       }
