@@ -138,7 +138,7 @@ class Location:
             print("Quest failed. Restarting adventure...")
 
 
-def azure_dragon_encounter(character):
+def azure_dragon_encounter(character, weapon_choice, combat_action):
     print("The air grows cold and the ground trembles as you step into the lair of the Azure Dragon.")
     print("You have entered the Dungeon of the Azure Dragon!")
     weapons = ["Halberd", "Heavy Crossbow", "Divine Rapier", "Recurve Bow", "Spellcaster"]
@@ -149,43 +149,60 @@ def azure_dragon_encounter(character):
         "Recurve Bow": "A bow with intricate designs, its arrows swift and true.",
         "Spellcaster": "Harness the arcane, casting spells of destruction and protection."
     }
-    dragon_hits = 0
 
-    print("Choose your weapon to fight the Azure Dragon:")
-    for i, weapon in enumerate(weapons, start=1):
-        print(f"{i}. {weapon}: {weapon_descriptions[weapon]}")
+    if 1 <= weapon_choice <= 5:
+        chosen_weapon = weapons[weapon_choice - 1]
+        print(f"You have chosen the {chosen_weapon}. The battle begins!")
 
-    try:
-        weapon_choice = int(input("Select a weapon (1-5): "))
-        if 1 <= weapon_choice <= 5:
-            chosen_weapon = weapons[weapon_choice - 1]
-            print(f"You have chosen the {chosen_weapon}. The battle begins!")
-
-            while dragon_hits < 2:
-                combat_action = input(f"Choose an action with your {chosen_weapon}: [strike/block]: ").lower()
-                if combat_action == "strike":
-                    dragon_hits += 1
-                    print(f"You strike the Azure Dragon with your {chosen_weapon}! It reels from the hit.")
-                elif combat_action == "block":
-                    print(f"You skillfully block the Azure Dragon's attack with your {chosen_weapon}.")
-                else:
-                    print("In your hesitation, the dragon gains the upper hand!")
-
-                if dragon_hits == 2:
-                    victory_description = {
-                        "Halberd": "With a mighty thrust of your Halberd, the dragon collapses, defeated by your valor.",
-                        "Heavy Crossbow": "Your final bolt finds its mark in the dragon's heart, ending its reign of terror.",
-                        "Divine Rapier": "Light from your Divine Rapier pierces the dragon, banishing its dark essence.",
-                        "Recurve Bow": "Your last arrow soars, striking true and felling the mighty beast.",
-                        "Spellcaster": "A burst of magical energy envelops the dragon, sealing its fate."
-                    }
-                    print(victory_description[chosen_weapon])
-                    print(f"Congratulations {character.name}, you have defeated the Azure Dragon!")
-                    break
+        dragon_hits = 0
+        if combat_action == "strike":
+            dragon_hits += 1
+            print(f"You strike the Azure Dragon with your {chosen_weapon}! It reels from the hit.")
+        elif combat_action == "block":
+            print(f"You skillfully block the Azure Dragon's attack with your {chosen_weapon}.")
         else:
-            print("Invalid choice. The dragon attacks and you are unprepared! The battle is lost.")
-    except ValueError:
-        print("Invalid input. Please enter a number between 1 and 5.")
+            print("In your hesitation, the dragon gains the upper hand!")
+
+        if dragon_hits == 2:
+            victory_description = {
+                "Halberd": "With a mighty thrust of your Halberd, the dragon collapses, defeated by your valor.",
+                "Heavy Crossbow": "Your final bolt finds its mark in the dragon's heart, ending its reign of terror.",
+                "Divine Rapier": "Light from your Divine Rapier pierces the dragon, banishing its dark essence.",
+                "Recurve Bow": "Your last arrow soars, striking true and felling the mighty beast.",
+                "Spellcaster": "A burst of magical energy envelops the dragon, sealing its fate."
+            }
+            print(victory_description[chosen_weapon])
+            print(f"Congratulations {character.name}, you have defeated the Azure Dragon!")
+            return "You have defeated the Azure Dragon!"
+    else:
+        return "Invalid choice. The dragon attacks and you are unprepared! The battle is lost."
+def perform_action(game_state, action_data):
+    character = game_state['character']
+    action_type = action_data.get('type')
+    details = action_data.get('details')
+
+    if action_type == 'explore':
+        location_name = details.get('location')
+        location = next((loc for loc in [Location("Blacksmith", "a place where weapons are made", [blacksmith_event]),
+                                         Location("Castle", "the residence of the king", [castle_event]),
+                                         Location("Mysterious Forest", "a forest full of secrets", [forest_event])]
+                         if loc.name == location_name), None)
+        if location:
+            return location.explore(character)
+    elif action_type == 'rest':
+        character.rest()
+        return f"{character.name} has rested and is stronger."
+    # Add more actions as needed
+
+    return "Action not recognized"
+@app.route('/action', methods=['POST'])
+def action():
+    if 'game' in session:
+        action_data = request.get_json()  # Assume JSON payload with action details
+        response = game.perform_action(session['game'], action_data)
+        return jsonify({'message': 'Action performed', 'result': response})
+    return jsonify({'error': 'No game started'}), 400
+
 
 def init_game():
     # Initialize the game with one or more characters
