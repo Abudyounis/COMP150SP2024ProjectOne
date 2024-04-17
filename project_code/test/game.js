@@ -2,9 +2,8 @@ var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
 var grid = 16;
 var requestAnimationFrameId = null;
-//http://localhost:8000/snake.html
 
-// Initialize snake and apple outside of startGame to be globally accessible
+// Initialize snake and apple to be globally accessible
 var snake = {
   x: 160,
   y: 160,
@@ -23,7 +22,6 @@ function getRandomInt(min, max) {
 }
 
 function startGame() {
-  // Cancel any existing animation frame to avoid speedup issues
   if (requestAnimationFrameId) {
     cancelAnimationFrame(requestAnimationFrameId);
   }
@@ -38,77 +36,91 @@ function startGame() {
   apple.x = getRandomInt(0, 25) * grid;
   apple.y = getRandomInt(0, 25) * grid;
 
-  var count = 0;
-
   function loop() {
     requestAnimationFrameId = requestAnimationFrame(loop);
-
-    // slow game loop to 15 fps instead of 60 (60/15 = 4)
-    if (++count < 4) {
-      return;
-    }
-
-    count = 0;
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    // move snake
-    snake.x += snake.dx;
-    snake.y += snake.dy;
-
-    // wrap snake position horizontally on edge of screen
-    if (snake.x < 0) {
-      snake.x = canvas.width - grid;
-    } else if (snake.x >= canvas.width) {
-      snake.x = 0;
-    }
-
-    // wrap snake position vertically on edge of screen
-    if (snake.y < 0) {
-      snake.y = canvas.height - grid;
-    } else if (snake.y >= canvas.height) {
-      snake.y = 0;
-    }
-
-    // keep track of where snake has been
-    snake.cells.unshift({x: snake.x, y: snake.y});
-    if (snake.cells.length > snake.maxCells) {
-      snake.cells.pop();
-    }
-
-    // draw apple
-    context.fillStyle = 'red';
-    context.fillRect(apple.x, apple.y, grid-1, grid-1);
-
-    // draw snake
-    context.fillStyle = 'green';
-    snake.cells.forEach(function(cell, index) {
-      context.fillRect(cell.x, cell.y, grid-1, grid-1);
-
-      // snake eating apple
-      if (cell.x === apple.x && cell.y === apple.y) {
-        snake.maxCells++;
-        apple.x = getRandomInt(0, 25) * grid;
-        apple.y = getRandomInt(0, 25) * grid;
-      }
-
-      // check collision with all cells after this one
-      for (var i = index + 1; i < snake.cells.length; i++) {
-        if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-          // Reset game
-          startGame();  // Restart the game if snake collides with itself
-          return; // Exit the current animation frame loop to prevent further execution after restart
-        }
-      }
-    });
+    updateGame();
   }
 
-  // start the game loop
-  requestAnimationFrame(loop);
+  loop();
+  document.getElementById('pauseButton').style.display = 'inline';
+  document.getElementById('resumeButton').style.display = 'none';
 }
 
-// Event listeners for the game
-document.getElementById('startButton').addEventListener('click', function() {
-  startGame();
+function updateGame() {
+  // slow game loop to 15 fps instead of 60 (60/15 = 4)
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  // move snake
+  snake.x += snake.dx;
+  snake.y += snake.dy;
+
+  // wrap snake position horizontally on edge of screen
+  if (snake.x < 0) {
+    snake.x = canvas.width - grid;
+  } else if (snake.x >= canvas.width) {
+    snake.x = 0;
+  }
+
+  // wrap snake position vertically on edge of screen
+  if (snake.y < 0) {
+    snake.y = canvas.height - grid;
+  } else if (snake.y >= canvas.height) {
+    snake.y = 0;
+  }
+
+  // keep track of where snake has been
+  snake.cells.unshift({x: snake.x, y: snake.y});
+  if (snake.cells.length > snake.maxCells) {
+    snake.cells.pop();
+  }
+
+  // draw apple
+  context.fillStyle = 'red';
+  context.fillRect(apple.x, apple.y, grid-1, grid-1);
+
+  // draw snake
+  context.fillStyle = 'green';
+  snake.cells.forEach(function(cell, index) {
+    context.fillRect(cell.x, cell.y, grid-1, grid-1);
+
+    // snake eating apple
+    if (cell.x === apple.x && cell.y === apple.y) {
+      snake.maxCells++;
+      apple.x = getRandomInt(0, 25) * grid;
+      apple.y = getRandomInt(0, 25) * grid;
+    }
+
+    // check collision with all cells after this one
+    for (var i = index + 1; i < snake.cells.length; i++) {
+      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+        startGame();  // Restart the game if snake collides with itself
+        return; // Exit the current animation frame loop to prevent further execution after restart
+      }
+    }
+  });
+}
+
+document.getElementById('startButton').addEventListener('click', startGame);
+
+document.getElementById('pauseButton').addEventListener('click', function() {
+  if (requestAnimationFrameId) {
+    cancelAnimationFrame(requestAnimationFrameId);
+    requestAnimationFrameId = null;
+    document.getElementById('pauseButton').style.display = 'none';
+    document.getElementById('resumeButton').style.display = 'inline';
+  }
+});
+
+document.getElementById('resumeButton').addEventListener('click', function() {
+  if (!requestAnimationFrameId) {
+    function resumeLoop() {
+      requestAnimationFrameId = requestAnimationFrame(resumeLoop);
+      updateGame();
+    }
+    resumeLoop();
+    document.getElementById('resumeButton').style.display = 'none';
+    document.getElementById('pauseButton').style.display = 'inline';
+  }
 });
 
 document.addEventListener('keydown', function(e) {
