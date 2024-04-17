@@ -125,7 +125,7 @@ class Location:
         self.name = name
         self.description = description
         self.events = events
-
+     
     def explore(self, character):
         print(f"{character.name} treads cautiously into the {self.name}. {self.description}")
         return random.choice(self.events)(character)
@@ -195,7 +195,7 @@ def perform_action(game_state, action_data):
     # Add more actions as needed
 
     return "Action not recognized"
- """
+"""
 @app.route('/action', methods=['POST'])
 def action():
     if 'game' in session:
