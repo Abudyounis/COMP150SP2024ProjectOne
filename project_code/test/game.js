@@ -2,6 +2,7 @@ var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
 var grid = 16;
 var requestAnimationFrameId = null;
+//http://localhost:8000/snake.html
 
 // Initialize snake and apple outside of startGame to be globally accessible
 var snake = {
