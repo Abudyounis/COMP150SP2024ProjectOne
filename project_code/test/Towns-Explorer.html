@@ -80,7 +80,7 @@
             }
             displayCurrentCharacter();
         }
-
+var sword = new Audio('metal-whoosh-hit-10-202176.mp3')
         function displayCurrentCharacter() {
             if (characters.length === 0) {
                 document.getElementById('gameOutput').innerHTML = 'All characters have left. The game is now over.';
@@ -120,6 +120,7 @@
                                     /*
                 if location.name == "Blacksmith"{
                     //play sound blacksmith
+                    sword.play();
                 }
                 else if location.name == "Castle" {
                 //play sound castle
