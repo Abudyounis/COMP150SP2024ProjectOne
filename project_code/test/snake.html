@@ -205,6 +205,22 @@
       }
     });
 
+    document.addEventListener('keydown', function(e) {
+      // Prevent the snake from reversing direction
+      if (e.which === 37 && snake.dx === 0) { // Left arrow key
+        snake.dx = -grid;
+        snake.dy = 0;
+      } else if (e.which === 38 && snake.dy === 0) { // Up arrow key
+        snake.dy = -grid;
+        snake.dx = 0;
+      } else if (e.which === 39 && snake.dx === 0) { // Right arrow key
+        snake.dx = grid;
+        snake.dy = 0;
+      } else if (e.which === 40 && snake.dy === 0) { // Down arrow key
+        snake.dy = grid;
+        snake.dx = 0;
+      }
+    });
   </script>
 </body>
 </html>
