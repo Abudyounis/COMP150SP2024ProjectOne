@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DnD Game</title>
+    <title>Towns Explorer Game</title>
     <style>
         body, html {
             height: 100%;
@@ -33,7 +33,7 @@
 <body>
     <div id="gameContainer">
         <h1>Welcome to the Web-based Towns Explorer Game!</h1>
-        <p id="gameDescription">Click the button below to start your adventure.</p>
+        <p id="gameDescription">Embark on an adventure filled with lore, mystery, and danger. Click below to begin your journey through the enchanted realms.</p>
         <button onclick="initializeGame()">Start Game</button>
         <div id="gameOutput"></div>
     </div>
@@ -42,9 +42,27 @@
         let characters = [];
         let currentCharacterIndex = 0;
         let locations = [
-            { name: "Blacksmith", description: "a place where weapons are made", requirements: { "Stamina": 13, "Strength": 5, "Endurance": 5, "Vitality": 5 } },
-            { name: "Castle", description: "the residence of the king", requirements: { "Psy": 14, "Wisdom": 5, "Intelligence": 5, "Knowledge": 5 } },
-            { name: "Mysterious Forest", description: "a forest full of secrets", requirements: { "Mana": 15, "Dexterity": 5, "Spirit": 5, "Willpower": 5 } }
+            {
+                name: "Blacksmith",
+                description: "Nestled in the bustling marketplace, the blacksmith's forge blazes in anticipation of crafting legendary weapons.",
+                requirements: { "Stamina": 13, "Strength": 5, "Endurance": 5, "Vitality": 5 },
+                successDescription: "With hammer in hand, you assist the blacksmith in forging a mighty sword, gaining not only skill but also strength.",
+                failDescription: "The heat of the forge proves too much, sapping your strength and yielding no fruit from your labors."
+            },
+            {
+                name: "Castle",
+                description: "The king's majestic castle towers over the land, filled with court intrigues and whispers of ancient secrets.",
+                requirements: { "Psy": 14, "Wisdom": 5, "Intelligence": 5, "Knowledge": 5 },
+                successDescription: "You navigate the political intrigue of the court, earning the king's favor and a pouch of gold coins for your counsel.",
+                failDescription: "Lost in the complex etiquette of the court, you find yourself outmaneuvered by wiser heads, gaining nothing."
+            },
+            {
+                name: "Mysterious Forest",
+                description: "This ancient forest whispers with the voices of the old world, promising secrets to those brave enough to explore its depths.",
+                requirements: { "Mana": 15, "Dexterity": 5, "Spirit": 5, "Willpower": 5 },
+                successDescription: "Guided by the forest spirits, you uncover ancient artifacts buried beneath the mossy earth, enhancing your magic.",
+                failDescription: "The forest cloaks its secrets in shadow and illusion, confusing your senses and leading you astray."
+            }
         ];
 
         function initializeGame() {
@@ -93,14 +111,14 @@
             if (success) {
                 character.experience += 5;
                 character.successful_quests.add(location.name);
-                alert(`Success at ${location.name}! ${character.name} gains experience.`);
+                alert(`Success at ${location.name}! ${character.name} gains experience. ${location.successDescription}`);
                 if (character.experience >= 10) {
                     character.level++;
                     character.experience -= 10;
                     alert(`${character.name} has leveled up to level ${character.level}!`);
                 }
             } else {
-                alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions.`);
+                alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions. ${location.failDescription}`);
             }
             nextTurn();
         }
@@ -119,7 +137,7 @@
             Object.values(character.stats).forEach(stat => {
                 stat.value += Math.floor(Math.random() * 3) + 1;
             });
-            alert(`${character.name} has rested and gained strength.`);
+            alert(`${character.name} has rested and regained strength, ready to face new challenges.`);
             nextTurn();
         }
 
