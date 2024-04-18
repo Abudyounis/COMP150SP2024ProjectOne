@@ -176,23 +176,29 @@ function meetAzureDragon(character) {
 }
 
 function conductBattleWithDragon(character, weapon) {
-    const battleActions = ["attack", "defend"];
+    let inBattle = true;
+    let attackCount = 0;
+
     alert(`${character.name} wields the ${weapon}. Prepare to fight!`);
-    for (let i = 0; i < 2; i++) {
+
+    while (inBattle) {
         const action = prompt("Choose your action: attack or defend.");
+
         if (action.toLowerCase() === "attack") {
+            attackCount++;
             alert("You fiercely attack the dragon!");
-            if (i === 1) { // Second attack slays the dragon
+            if (attackCount >= 2) { // If attacked twice, slays the dragon
                 alert("With a heroic effort, you slay the Azure Dragon!");
                 character.experience += 20;
-                break;
+                inBattle = false; // Ends the battle loop
             }
         } else if (action.toLowerCase() === "defend") {
             alert("You defend against the dragon's fiery breath!");
+            // Battle continues, waiting for next player action
         } else {
             alert("Confused by your actions, the dragon seizes the moment and slays you!");
             characters.splice(currentCharacterIndex, 1);
-            break;
+            inBattle = false; // Ends the battle loop
         }
     }
 }
