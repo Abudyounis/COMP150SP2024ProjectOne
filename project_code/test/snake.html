@@ -66,7 +66,7 @@
     var grid = 16;
     var requestAnimationFrameId = null;
     var frameCounter = 0;
-    var startTime, timerInterval;
+    var startTime, timerInterval, rainbowAppleInterval;
 
     var snake = {
         x: 160,
@@ -120,17 +120,10 @@
         apple.y = getRandomInt(0, 25) * grid;
         apple.color = 'red';
 
-        if (Math.random() < 0.15) {
-            rainbowApple.x = getRandomInt(0, 25) * grid;
-            rainbowApple.y = getRandomInt(0, 25) * grid;
-            rainbowApple.active = true;
-        } else {
-            rainbowApple.active = false;
-        }
-
         startTime = Date.now();
         updateTimer();
         timerInterval = setInterval(updateTimer, 1000);
+        rainbowAppleInterval = setInterval(trySpawnRainbowApple, 1000);
 
         function loop() {
             requestAnimationFrameId = requestAnimationFrame(loop);
@@ -195,6 +188,7 @@
                 if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
                     deathSound.play();
                     clearInterval(timerInterval);
+                    clearInterval(rainbowAppleInterval);
                     startGame();
                     return;
                 }
@@ -207,11 +201,20 @@
         document.getElementById('timer').textContent = 'Time: ' + elapsedTime + 's';
     }
 
+    function trySpawnRainbowApple() {
+        if (!rainbowApple.active && Math.random() < 0.05) {
+            rainbowApple.x = getRandomInt(0, 25) * grid;
+            rainbowApple.y = getRandomInt(0, 25) * grid;
+            rainbowApple.active = true;
+        }
+    }
+
     document.getElementById('startButton').addEventListener('click', startGame);
     document.getElementById('pauseButton').addEventListener('click', function() {
         if (requestAnimationFrameId) {
             cancelAnimationFrame(requestAnimationFrameId);
             clearInterval(timerInterval);
+            clearInterval(rainbowAppleInterval);
             requestAnimationFrameId = null;
             document.getElementById('pauseButton').style.display = 'none';
             document.getElementById('resumeButton').style.display = 'inline';
@@ -222,6 +225,7 @@
         if (!requestAnimationFrameId) {
             startTime = Date.now() - (parseInt(document.getElementById('timer').textContent.split(' ')[1], 10) * 1000);
             timerInterval = setInterval(updateTimer, 1000);
+            rainbowAppleInterval = setInterval(trySpawnRainbowApple, 1000);
             function resumeLoop() {
                 requestAnimationFrameId = requestAnimationFrame(resumeLoop);
                 if (++frameCounter >= 5) {
@@ -232,23 +236,6 @@
             resumeLoop();
             document.getElementById('resumeButton').style.display = 'none';
             document.getElementById('pauseButton').style.display = 'inline';
-        }
-    });
-
-    document.addEventListener('keydown', function(e) {
-        // Prevent the snake from reversing direction
-        if (e.which === 37 && snake.dx === 0) { // Left arrow key
-            snake.dx = -grid;
-            snake.dy = 0;
-        } else if (e.which === 38 && snake.dy === 0) { // Up arrow key
-            snake.dy = -grid;
-            snake.dx = 0;
-        } else if (e.which === 39 && snake.dx === 0) { // Right arrow key
-            snake.dx = grid;
-            snake.dy = 0;
-        } else if (e.which === 40 && snake.dy === 0) { // Down arrow key
-            snake.dy = grid;
-            snake.dx = 0;
         }
     });
 </script>
