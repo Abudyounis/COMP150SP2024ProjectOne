@@ -106,22 +106,19 @@ var fail = new Audio('spongebob-fail.mp3');
 
 function explore() {
     const character = characters[currentCharacterIndex];
-    const availableLocations = locations.filter(loc => !character.attempted_quests.has(loc.name));
-
-    // Debugging to see if all locations have been attempted
-    console.log("Available locations:", availableLocations.length);
-    console.log("Successful quests:", character.successful_quests.size);
-    console.log("Total locations:", locations.length);
+    // Filter for locations that were either never attempted or were attempted but failed
+    const availableLocations = locations.filter(loc => 
+        !character.successful_quests.has(loc.name));
 
     if (availableLocations.length === 0) {
         if (character.successful_quests.size === locations.length) {
-            console.log("Meeting the Azure Dragon now."); // Debugging
+            // If all quests were successfully completed, meet the Azure Dragon
             meetAzureDragon(character);
             return;
         } else {
             alert('No available locations to explore. You must rest or quit.');
+            return;
         }
-        return;
     }
 
     const location = availableLocations[Math.floor(Math.random() * availableLocations.length)];
@@ -137,7 +134,6 @@ function explore() {
             character.experience -= 10;
             alert(`${character.name} has leveled up to level ${character.level}!`);
         }
-        // Play appropriate sound
         playLocationSound(location.name);
     } else {
         alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions. ${location.failDescription}`);
@@ -145,6 +141,21 @@ function explore() {
     }
     nextTurn();
 }
+
+function rest() {
+    const character = characters[currentCharacterIndex];
+    Object.values(character.stats).forEach(stat => {
+        stat.value += Math.floor(Math.random() * 3) + 1;  // Increment stats
+    });
+
+    // Allow failed quests to be reattempted
+    const failedQuests = new Set([...character.attempted_quests].filter(x => !character.successful_quests.has(x)));
+    character.attempted_quests = new Set([...failedQuests]);  // Reset attempted quests to only include failed ones
+
+    alert(`${character.name} has rested and regained strength, ready to face new challenges.`);
+    nextTurn();
+}
+
 
 function meetAzureDragon(character) {
     const weapons = ["Blade of Eternity", "Stormbreaker Axe", "Celestial Bow", "Shadow Daggers"];
@@ -205,14 +216,7 @@ function playLocationSound(locationName) {
             return true;
         }
 
-        function rest() {
-            const character = characters[currentCharacterIndex];
-            Object.values(character.stats).forEach(stat => {
-                stat.value += Math.floor(Math.random() * 3) + 1;
-            });
-            alert(`${character.name} has rested and regained strength, ready to face new challenges.`);
-            nextTurn();
-        }
+
 
         function quitGame() {
             alert(`${characters[currentCharacterIndex].name} has left the game.`);
