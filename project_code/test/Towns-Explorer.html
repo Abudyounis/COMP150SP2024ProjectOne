@@ -78,10 +78,6 @@
         outputDiv.innerHTML += `<button onclick="explore()">Explore</button>`;
         outputDiv.innerHTML += `<button onclick="rest()">Rest</button>`;
         outputDiv.innerHTML += `<button onclick="quitGame()">Quit Game</button>`;
-
-        if (character.successful_quests.size === locations.length) {
-            outputDiv.innerHTML += `<p>All quests have been fulfilled by ${character.name}!</p>`;
-        }
     }
 
     function explore() {
@@ -89,17 +85,16 @@
         const availableLocations = locations.filter(loc => !character.successful_quests.has(loc.name));
 
         if (availableLocations.length === 0) {
-            alert('No available locations to explore. You must rest to reset your quests or all quests are completed.');
+            alert('No available locations to explore. All quests have been completed or failed.');
             return;
         }
 
         const location = availableLocations[Math.floor(Math.random() * availableLocations.length)];
         const success = meetRequirements(character, location.requirements);
-        character.attempted_quests.add(location.name);
 
         if (success) {
-            character.experience += 5;
             character.successful_quests.add(location.name);
+            character.experience += 5;
             alert(`Success at ${location.name}! ${character.name} gains experience.`);
             if (character.experience >= 10) {
                 character.level++;
@@ -107,6 +102,7 @@
                 alert(`${character.name} has leveled up to level ${character.level}!`);
             }
         } else {
+            character.failed_quests.add(location.name);
             alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions.`);
         }
         nextTurn();
@@ -123,11 +119,13 @@
 
     function rest() {
         const character = characters[currentCharacterIndex];
-        character.attempted_quests.clear();  // Reset quests on rest
+        character.attempted_quests.clear(); // Clear attempted quests
+        character.failed_quests.clear(); // Clear failed quests for reattempt
+
         Object.values(character.stats).forEach(stat => {
             stat.value += Math.floor(Math.random() * 3) + 1;
         });
-        alert(`${character.name} has rested and reset their quests. They are stronger now.`);
+        alert(`${character.name} has rested and can reattempt failed quests. They are stronger now.`);
         nextTurn();
     }
 
@@ -173,7 +171,8 @@
                 Psy: Math.floor(Math.random() * 11) + 10
             },
             attempted_quests: new Set(),
-            successful_quests: new Set()
+            successful_quests: new Set(),
+            failed_quests: new Set()
         };
     }
 
