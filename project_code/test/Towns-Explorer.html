@@ -1,3 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DnD Game</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #gameContainer {
+            text-align: center;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        input[type="number"] {
+            padding: 5px;
+            width: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <h1>Welcome to the Web-based DnD Game!</h1>
+        <p id="gameDescription">Click the button below to start your adventure.</p>
+        <button onclick="initializeGame()">Start Game</button>
+        <div id="gameOutput"></div>
+    </div>
+
 <script>
     let characters = [];
     let currentCharacterIndex = 0;
