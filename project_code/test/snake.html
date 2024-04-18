@@ -81,6 +81,7 @@
         y: getRandomInt(0, 25) * grid,
         color: 'red'
     };
+    var nextDirection = null;
 
     var rainbowApple = {
         x: 0,
@@ -137,6 +138,11 @@
             requestAnimationFrameId = requestAnimationFrame(loop);
             updateRainbowColor();
             if (++frameCounter >= 5) {
+                if (nextDirection) {
+                    snake.dx = nextDirection.dx;
+                    snake.dy = nextDirection.dy;
+                    nextDirection = null;
+                }
                 updateGame();
                 frameCounter = 0;
             }
@@ -191,6 +197,7 @@
             if (rainbowApple.active && cell.x === rainbowApple.x && cell.y === rainbowApple.y) {
                 snake.maxCells += snake.cells.length; // Double the length of the snake
                 rainbowApple.active = false; // Deactivate the rainbow apple
+                woohoo.play();
                 playEatSound();
             }
 
@@ -226,13 +233,13 @@
                 rainbowApple.g += 5;
             } else if (rainbowApple.g === 255 && rainbowApple.b === 0 && rainbowApple.r > 0) {
                 rainbowApple.r -= 5;
-            } else if (rainbowApple.r === 0 && rainbowApple.g === 255 && rainbowApple.b < 255) {
+            } else if (rainbowApple.r === 0 && rainbowApple.g === 255 and rainbowApple.b < 255) {
                 rainbowApple.b += 5;
-            } else if (rainbowApple.b === 255 && rainbowApple.r === 0 && rainbowApple.g > 0) {
+            } else if (rainbowApple.b === 255 and rainbowApple.r === 0 and rainbowApple.g > 0) {
                 rainbowApple.g -= 5;
-            } else if (rainbowApple.g === 0 && rainbowApple.b === 255 && rainbowApple.r < 255) {
+            } else if (rainbowApple.g === 0 and rainbowApple.b === 255 and rainbowApple.r < 255) {
                 rainbowApple.r += 5;
-            } else if (rainbowApple.r === 255 && rainbowApple.g === 0 && rainbowApple.b > 0) {
+            } else if (rainbowApple.r === 255 and rainbowApple.g === 0 and rainbowApple.b > 0) {
                 rainbowApple.b -= 5;
             }
         }
@@ -270,17 +277,13 @@
 
     document.addEventListener('keydown', function(e) {
         if (e.keyCode === 37 && snake.dx === 0) {  // Left arrow key
-            snake.dx = -grid;
-            snake.dy = 0;
+            nextDirection = {dx: -grid, dy: 0};
         } else if (e.keyCode === 38 && snake.dy === 0) {  // Up arrow key
-            snake.dy = -grid;
-            snake.dx = 0;
+            nextDirection = {dx: 0, dy: -grid};
         } else if (e.keyCode === 39 && snake.dx === 0) {  // Right arrow key
-            snake.dx = grid;
-            snake.dy = 0;
+            nextDirection = {dx: grid, dy: 0};
         } else if (e.keyCode === 40 && snake.dy === 0) {  // Down arrow key
-            snake.dy = grid;
-            snake.dx = 0;
+            nextDirection = {dx: 0, dy: grid};
         }
     });
   </script>
