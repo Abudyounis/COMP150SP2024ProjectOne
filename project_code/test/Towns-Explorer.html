@@ -80,7 +80,8 @@
             }
             displayCurrentCharacter();
         }
-var sword = new Audio('metal-whoosh-hit-10-202176.mp3')
+var sword = new Audio('metal-whoosh-hit-10-202176.mp3');
+var king = new Audio('clash-royale-laugh.mp3');
         function displayCurrentCharacter() {
             if (characters.length === 0) {
                 document.getElementById('gameOutput').innerHTML = 'All characters have left. The game is now over.';
@@ -124,6 +125,7 @@ var sword = new Audio('metal-whoosh-hit-10-202176.mp3')
                 }
                 else if location.name == "Castle" {
                 //play sound castle
+                king.play();
                 }
                 else {
                     //play sound myterious forest
