@@ -106,19 +106,14 @@ var fail = new Audio('spongebob-fail.mp3');
 
 function explore() {
     const character = characters[currentCharacterIndex];
-    // Filter for locations that were either never attempted or were attempted but failed
-    const availableLocations = locations.filter(loc => 
-        !character.successful_quests.has(loc.name));
+    const availableLocations = locations.filter(loc => !character.successful_quests.has(loc.name));
 
-    if (availableLocations.length === 0) {
-        if (character.successful_quests.size === locations.length) {
-            // If all quests were successfully completed, meet the Azure Dragon
-            meetAzureDragon(character);
-            return;
-        } else {
-            alert('No available locations to explore. You must rest or quit.');
-            return;
-        }
+    if (availableLocations.length === 0 && character.dragonSlain) {
+        alert("All explorations have been explored, and the dragon has already been slain.");
+        return;
+    } else if (availableLocations.length === 0) {
+        meetAzureDragon(character);
+        return;
     }
 
     const location = availableLocations[Math.floor(Math.random() * availableLocations.length)];
@@ -141,6 +136,7 @@ function explore() {
     }
     nextTurn();
 }
+
 
 function rest() {
     const character = characters[currentCharacterIndex];
@@ -190,6 +186,7 @@ function conductBattleWithDragon(character, weapon) {
             if (attackCount >= 2) { // If attacked twice, slays the dragon
                 alert("With a heroic effort, you slay the Azure Dragon!");
                 character.experience += 20;
+                character.dragonSlain = true; // Mark the dragon as slain
                 inBattle = false; // Ends the battle loop
             }
         } else if (action.toLowerCase() === "defend") {
@@ -202,6 +199,7 @@ function conductBattleWithDragon(character, weapon) {
         }
     }
 }
+
 
 function playLocationSound(locationName) {
     if (locationName === "Blacksmith") {
@@ -242,34 +240,36 @@ function playLocationSound(locationName) {
             displayCurrentCharacter();
         }
 
-        function createCharacter(name) {
-            let legacyPoints = Math.floor(Math.random() * 51);
-            const newCharacter = {
-                name: name,
-                level: 1,
-                experience: 0,
-                stats: {
-                    Strength: randomStat("Strength", legacyPoints),
-                    Dexterity: randomStat("Dexterity", legacyPoints),
-                    Constitution: randomStat("Constitution", legacyPoints),
-                    Vitality: randomStat("Vitality", legacyPoints),
-                    Endurance: randomStat("Endurance", legacyPoints),
-                    Intelligence: randomStat("Intelligence", legacyPoints),
-                    Wisdom: randomStat("Wisdom", legacyPoints),
-                    Knowledge: randomStat("Knowledge", legacyPoints),
-                    Willpower: randomStat("Willpower", legacyPoints),
-                    Spirit: randomStat("Spirit", legacyPoints)
-                },
-                capacity: {
-                    Mana: Math.floor(Math.random() * 11) + 10,
-                    Stamina: Math.floor(Math.random() * 11) + 10,
-                    Psy: Math.floor(Math.random() * 11) + 10
-                },
-                attempted_quests: new Set(),
-                successful_quests: new Set()
-            };
-            return newCharacter;
-        }
+function createCharacter(name) {
+    let legacyPoints = Math.floor(Math.random() * 51);
+    const newCharacter = {
+        name: name,
+        level: 1,
+        experience: 0,
+        stats: {
+            Strength: randomStat("Strength", legacyPoints),
+            Dexterity: randomStat("Dexterity", legacyPoints),
+            Constitution: randomStat("Constitution", legacyPoints),
+            Vitality: randomStat("Vitality", legacyPoints),
+            Endurance: randomStat("Endurance", legacyPoints),
+            Intelligence: randomStat("Intelligence", legacyPoints),
+            Wisdom: randomStat("Wisdom", legacyPoints),
+            Knowledge: randomStat("Knowledge", legacyPoints),
+            Willpower: randomStat("Willpower", legacyPoints),
+            Spirit: randomStat("Spirit", legacyPoints)
+        },
+        capacity: {
+            Mana: Math.floor(Math.random() * 11) + 10,
+            Stamina: Math.floor(Math.random() * 11) + 10,
+            Psy: Math.floor(Math.random() * 11) + 10
+        },
+        attempted_quests: new Set(),
+        successful_quests: new Set(),
+        dragonSlain: false
+    };
+    return newCharacter;
+}
+
 
         function randomStat(name, legacyPoints) {
             return { name: name, value: Math.floor(Math.random() * 10) + 1 + Math.floor(legacyPoints / 10) };
