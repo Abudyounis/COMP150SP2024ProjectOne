@@ -50,21 +50,21 @@
             {
                 name: "Blacksmith",
                 description: "Nestled in the bustling marketplace, the blacksmith's forge blazes in anticipation of crafting legendary weapons.",
-                requirements: { "Stamina": 13, "Strength": 5, "Endurance": 5, "Vitality": 5 },
+                requirements: { "Stamina": 1, "Strength": 8, "Endurance": 10, "Vitality": 7 },
                 successDescription: "With hammer in hand, you assist the blacksmith in forging a mighty sword, gaining not only skill but also strength.",
                 failDescription: "The heat of the forge proves too much, sapping your strength and yielding no fruit from your labors."
             },
             {
                 name: "Castle",
                 description: "The king's majestic castle towers over the land, filled with court intrigues and whispers of ancient secrets.",
-                requirements: { "Psy": 14, "Wisdom": 5, "Intelligence": 5, "Knowledge": 5 },
+                requirements: { "Psy": 1, "Wisdom": 5, "Intelligence": 5, "Knowledge": 5 },
                 successDescription: "You navigate the political intrigue of the court, earning the king's favor and a pouch of gold coins for your counsel.",
                 failDescription: "Lost in the complex etiquette of the court, you find yourself outmaneuvered by wiser heads, gaining nothing."
             },
             {
                 name: "Mysterious Forest",
                 description: "This ancient forest whispers with the voices of the old world, promising secrets to those brave enough to explore its depths.",
-                requirements: { "Mana": 15, "Dexterity": 5, "Spirit": 5, "Willpower": 5 },
+                requirements: { "Mana": 2, "Dexterity": 7, "Spirit": 5, "Willpower": 6 },
                 successDescription: "Guided by the forest spirits, you uncover ancient artifacts buried beneath the mossy earth, enhancing your magic.",
                 failDescription: "The forest cloaks its secrets in shadow and illusion, confusing your senses and leading you astray."
             }
@@ -104,43 +104,112 @@ var fail = new Audio('spongebob-fail.mp3');
             outputDiv.innerHTML += `<button onclick="quitGame()">Quit Game</button>`;
         }
 
-        function explore() {
-            const character = characters[currentCharacterIndex];
-            const availableLocations = locations.filter(loc => !character.attempted_quests.has(loc.name));
-            if (availableLocations.length === 0) {
-                alert('No available locations to explore. You must rest or quit.');
-                return;
-            }
+function explore() {
+    const character = characters[currentCharacterIndex];
+    const availableLocations = locations.filter(loc => !character.successful_quests.has(loc.name));
 
-            const location = availableLocations[Math.floor(Math.random() * availableLocations.length)];
-            const success = meetRequirements(character, location.requirements);
-            character.attempted_quests.add(location.name);
+    if (availableLocations.length === 0 && character.dragonSlain) {
+        alert("All explorations have been explored, and the dragon has already been slain.");
+        return;
+    } else if (availableLocations.length === 0) {
+        meetAzureDragon(character);
+        return;
+    }
 
-            if (success) {
-                character.experience += 5;
-                character.successful_quests.add(location.name);
-                alert(`Success at ${location.name}! ${character.name} gains experience. ${location.successDescription}`);
-                if (character.experience >= 10) {
-                    character.level++;
-                    character.experience -= 10;
-                    alert(`${character.name} has leveled up to level ${character.level}!`);
-                }
-                                
-                 // Play appropriate sound
-                if (location.name === "Blacksmith") { //sound sword
-                    sword.play();
-                } else if (location.name === "Castle") { //sound castle
-                    king.play();
-                } else if (location.name === "Mysterious Forest") { //sound tree
-                    tree.play();
-                }
-            
-            } else {
-                alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions. ${location.failDescription}`);
-                fail.play();
-            }
-            nextTurn();
+    const location = availableLocations[Math.floor(Math.random() * availableLocations.length)];
+    const success = meetRequirements(character, location.requirements);
+    character.attempted_quests.add(location.name);
+
+    if (success) {
+        character.experience += 5;
+        character.successful_quests.add(location.name);
+        alert(`Success at ${location.name}! ${character.name} gains experience. ${location.successDescription}`);
+        if (character.experience >= 10) {
+            character.level++;
+            character.experience -= 10;
+            alert(`${character.name} has leveled up to level ${character.level}!`);
         }
+        playLocationSound(location.name);
+    } else {
+        alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions. ${location.failDescription}`);
+        fail.play();
+    }
+    nextTurn();
+}
+
+
+function rest() {
+    const character = characters[currentCharacterIndex];
+    Object.values(character.stats).forEach(stat => {
+        stat.value += Math.floor(Math.random() * 3) + 1;  // Increment stats
+    });
+
+    // Allow failed quests to be reattempted
+    const failedQuests = new Set([...character.attempted_quests].filter(x => !character.successful_quests.has(x)));
+    character.attempted_quests = new Set([...failedQuests]);  // Reset attempted quests to only include failed ones
+
+    alert(`${character.name} has rested and regained strength, ready to face new challenges.`);
+    nextTurn();
+}
+
+
+function meetAzureDragon(character) {
+    const weapons = ["Blade of Eternity", "Stormbreaker Axe", "Celestial Bow", "Shadow Daggers"];
+    let message = "You encounter the Azure Dragon! Choose your weapon to face the dragon:\n";
+    weapons.forEach((weapon, index) => {
+        message += `${index + 1}. ${weapon}\n`;
+    });
+    const choice = prompt(message);
+    const weapon = weapons[parseInt(choice) - 1];
+
+    if (!weapon) {
+        alert("Invalid choice. The Azure Dragon slays you in confusion!");
+        characters.splice(currentCharacterIndex, 1);
+    } else {
+        conductBattleWithDragon(character, weapon);
+    }
+    nextTurn();
+}
+
+function conductBattleWithDragon(character, weapon) {
+    let inBattle = true;
+    let attackCount = 0;
+
+    alert(`${character.name} wields the ${weapon}. Prepare to fight!`);
+
+    while (inBattle) {
+        const action = prompt("Choose your action: attack or defend.");
+
+        if (action.toLowerCase() === "attack") {
+            attackCount++;
+            alert("You fiercely attack the dragon!");
+            if (attackCount >= 2) { // If attacked twice, slays the dragon
+                alert("With a heroic effort, you slay the Azure Dragon!");
+                character.experience += 20;
+                character.dragonSlain = true; // Mark the dragon as slain
+                inBattle = false; // Ends the battle loop
+            }
+        } else if (action.toLowerCase() === "defend") {
+            alert("You defend against the dragon's fiery breath!");
+            // Battle continues, waiting for next player action
+        } else {
+            alert("Confused by your actions, the dragon seizes the moment and slays you!");
+            characters.splice(currentCharacterIndex, 1);
+            inBattle = false; // Ends the battle loop
+        }
+    }
+}
+
+
+function playLocationSound(locationName) {
+    if (locationName === "Blacksmith") {
+        sword.play();
+    } else if (locationName === "Castle") {
+        king.play();
+    } else if (locationName === "Mysterious Forest") {
+        tree.play();
+    }
+}
 
         function meetRequirements(character, requirements) {
             for (let key in requirements) {
@@ -151,14 +220,7 @@ var fail = new Audio('spongebob-fail.mp3');
             return true;
         }
 
-        function rest() {
-            const character = characters[currentCharacterIndex];
-            Object.values(character.stats).forEach(stat => {
-                stat.value += Math.floor(Math.random() * 3) + 1;
-            });
-            alert(`${character.name} has rested and regained strength, ready to face new challenges.`);
-            nextTurn();
-        }
+
 
         function quitGame() {
             alert(`${characters[currentCharacterIndex].name} has left the game.`);
@@ -178,34 +240,36 @@ var fail = new Audio('spongebob-fail.mp3');
             displayCurrentCharacter();
         }
 
-        function createCharacter(name) {
-            let legacyPoints = Math.floor(Math.random() * 51);
-            const newCharacter = {
-                name: name,
-                level: 1,
-                experience: 0,
-                stats: {
-                    Strength: randomStat("Strength", legacyPoints),
-                    Dexterity: randomStat("Dexterity", legacyPoints),
-                    Constitution: randomStat("Constitution", legacyPoints),
-                    Vitality: randomStat("Vitality", legacyPoints),
-                    Endurance: randomStat("Endurance", legacyPoints),
-                    Intelligence: randomStat("Intelligence", legacyPoints),
-                    Wisdom: randomStat("Wisdom", legacyPoints),
-                    Knowledge: randomStat("Knowledge", legacyPoints),
-                    Willpower: randomStat("Willpower", legacyPoints),
-                    Spirit: randomStat("Spirit", legacyPoints)
-                },
-                capacity: {
-                    Mana: Math.floor(Math.random() * 11) + 10,
-                    Stamina: Math.floor(Math.random() * 11) + 10,
-                    Psy: Math.floor(Math.random() * 11) + 10
-                },
-                attempted_quests: new Set(),
-                successful_quests: new Set()
-            };
-            return newCharacter;
-        }
+function createCharacter(name) {
+    let legacyPoints = Math.floor(Math.random() * 51);
+    const newCharacter = {
+        name: name,
+        level: 1,
+        experience: 0,
+        stats: {
+            Strength: randomStat("Strength", legacyPoints),
+            Dexterity: randomStat("Dexterity", legacyPoints),
+            Constitution: randomStat("Constitution", legacyPoints),
+            Vitality: randomStat("Vitality", legacyPoints),
+            Endurance: randomStat("Endurance", legacyPoints),
+            Intelligence: randomStat("Intelligence", legacyPoints),
+            Wisdom: randomStat("Wisdom", legacyPoints),
+            Knowledge: randomStat("Knowledge", legacyPoints),
+            Willpower: randomStat("Willpower", legacyPoints),
+            Spirit: randomStat("Spirit", legacyPoints)
+        },
+        capacity: {
+            Mana: Math.floor(Math.random() * 11) + 10,
+            Stamina: Math.floor(Math.random() * 11) + 10,
+            Psy: Math.floor(Math.random() * 11) + 10
+        },
+        attempted_quests: new Set(),
+        successful_quests: new Set(),
+        dragonSlain: false
+    };
+    return newCharacter;
+}
+
 
         function randomStat(name, legacyPoints) {
             return { name: name, value: Math.floor(Math.random() * 10) + 1 + Math.floor(legacyPoints / 10) };
