@@ -80,13 +80,9 @@
 
         function explore() {
             const character = characters[currentCharacterIndex];
-            const availableLocations = locations.filter(loc => !character.successful_quests.has(loc.name));
+            const availableLocations = locations.filter(loc => !character.attempted_quests.has(loc.name));
             if (availableLocations.length === 0) {
-                if (character.successful_quests.size === locations.length) {
-                    azureDragonEncounter(character);
-                } else {
-                    alert('No available locations to explore. You must rest or quit.');
-                }
+                alert('No available locations to explore. You must rest or quit.');
                 return;
             }
 
@@ -123,8 +119,7 @@
             Object.values(character.stats).forEach(stat => {
                 stat.value += Math.floor(Math.random() * 3) + 1;
             });
-            character.attempted_quests.clear();  // Clear the attempted quests on rest
-            alert(`${character.name} has rested and regained strength.`);
+            alert(`${character.name} has rested and gained strength.`);
             nextTurn();
         }
 
@@ -181,16 +176,6 @@
 
         function displayStats(stats) {
             return Object.values(stats).map(stat => `${stat.name}: ${stat.value}`).join(', ');
-        }
-
-        function azureDragonEncounter(character) {
-            const dragonBattleOutcome = confirm(`${character.name} has completed all quests! Do you dare to enter the lair of the Azure Dragon for the ultimate challenge?`);
-            if (dragonBattleOutcome) {
-                alert("Congratulations! After a fierce battle, you have defeated the Azure Dragon and gained legendary status.");
-            } else {
-                alert("You decide to leave the dragon's lair and live to fight another day.");
-            }
-            quitGame();
         }
     </script>
 </body>
