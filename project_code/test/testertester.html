@@ -64,7 +64,7 @@
             {
                 name: "Mysterious Forest",
                 description: "This ancient forest whispers with the voices of the old world, promising secrets to those brave enough to explore its depths.",
-                requirements: { "Mana": 2, "Dexterity": 14, "Spirit": 5, "Willpower": 10 },
+                requirements: { "Mana": 2, "Dexterity": 7, "Spirit": 5, "Willpower": 6 },
                 successDescription: "Guided by the forest spirits, you uncover ancient artifacts buried beneath the mossy earth, enhancing your magic.",
                 failDescription: "The forest cloaks its secrets in shadow and illusion, confusing your senses and leading you astray."
             }
@@ -157,7 +157,7 @@ function meetAzureDragon(character) {
     const weapons = ["Blade of Eternity", "Stormbreaker Axe", "Celestial Bow", "Shadow Daggers"];
     let message = "You encounter the Azure Dragon! Choose your weapon to face the dragon:\\n";
     weapons.forEach((weapon, index) => {
-        message += `${index + 1}. ${weapon}\\n`;
+        message += `${index + 1}. ${weapon}\n`;
     });
     const choice = prompt(message);
     const weapon = weapons[parseInt(choice) - 1];
