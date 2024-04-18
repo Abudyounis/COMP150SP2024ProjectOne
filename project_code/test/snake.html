@@ -85,15 +85,20 @@
     var rainbowApple = {
         x: 0,
         y: 0,
-        color: 'rainbow',
-        active: false
+        r: 255,
+        g: 0,
+        b: 0,
+        active: false,
+        increment: {
+            r: 1,
+            g: 0,
+            b: 0
+        }
     };
 
     var eatSound = new Audio('90s-game-ui-6-185099.mp3');
     var alternateEatSound = new Audio('ding-36029.mp3');
     var deathSound = new Audio('classic_hurt.mp3');
-    var woohoo = new Audio('Cartoon-woohoo.mp3');
-
 
     function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min)) + min;
@@ -129,6 +134,7 @@
 
         function loop() {
             requestAnimationFrameId = requestAnimationFrame(loop);
+            updateRainbowColor();
             if (++frameCounter >= 5) {
                 updateGame();
                 frameCounter = 0;
@@ -165,7 +171,8 @@
         context.fillRect(apple.x, apple.y, grid-1, grid-1);
 
         if (rainbowApple.active) {
-            context.fillStyle = 'magenta';  // Using a solid color for visibility; gradients require a different approach
+            var color = `rgb(${rainbowApple.r}, ${rainbowApple.g}, ${rainbowApple.b})`;
+            context.fillStyle = color;
             context.fillRect(rainbowApple.x, rainbowApple.y, grid-1, grid-1);
         }
 
@@ -181,7 +188,6 @@
             }
 
             if (rainbowApple.active && cell.x === rainbowApple.x && cell.y === rainbowApple.y) {
-                woohoo.play();
                 snake.maxCells += snake.cells.length; // Double the length of the snake
                 rainbowApple.active = false; // Deactivate the rainbow apple
                 playEatSound();
@@ -212,6 +218,25 @@
         }
     }
 
+    function updateRainbowColor() {
+        if (rainbowApple.active) {
+            // Rotate through the color spectrum
+            if (rainbowApple.r === 255 && rainbowApple.b === 0 && rainbowApple.g < 255) {
+                rainbowApple.g += 5;
+            } else if (rainbowApple.g === 255 && rainbowApple.b === 0 && rainbowApple.r > 0) {
+                rainbowApple.r -= 5;
+            } else if (rainbowApple.r === 0 && rainbowApple.g === 255 && rainbowApple.b < 255) {
+                rainbowApple.b += 5;
+            } else if (rainbowApple.b === 255 && rainbowApple.r === 0 && rainbowApple.g > 0) {
+                rainbowApple.g -= 5;
+            } else if (rainbowApple.g === 0 && rainbowApple.b === 255 && rainbowApple.r < 255) {
+                rainbowApple.r += 5;
+            } else if (rainbowApple.r === 255 && rainbowApple.g === 0 && rainbowApple.b > 0) {
+                rainbowApple.b -= 5;
+            }
+        }
+    }
+
     document.getElementById('startButton').addEventListener('click', startGame);
     document.getElementById('pauseButton').addEventListener('click', function() {
         if (requestAnimationFrameId) {
@@ -238,22 +263,21 @@
             }
             resumeLoop();
             document.getElementById('resumeButton').style.display = 'none';
-            document.getElementById('pauseButton').style.display = 'inline';
+            document.getElementById('pauseButton')..style.display = 'inline';
         }
     });
 
     document.addEventListener('keydown', function(e) {
-        // Ensure proper movement and prevent the snake from reversing onto itself
-        if (e.keyCode === 37 && snake.dx === 0) {  // Left arrow key
+        if (e.keyCode === 37 && snake.dx === 0) {
             snake.dx = -grid;
             snake.dy = 0;
-        } else if (e.keyCode === 38 && snake.dy === 0) {  // Up arrow key
+        } else if (e.keyCode === 38 && snake.dy === 0) {
             snake.dy = -grid;
             snake.dx = 0;
-        } else if (e.keyCode === 39 && snake.dx === 0) {  // Right arrow key
+        } else if (e.keyCode === 39 && snake.dx === 0) {
             snake.dx = grid;
             snake.dy = 0;
-        } else if (e.keyCode === 40 && snake.dy === 0) {  // Down arrow key
+        } else if (e.keyCode === 40 && snake.dy === 0) {
             snake.dy = grid;
             snake.dx = 0;
         }
