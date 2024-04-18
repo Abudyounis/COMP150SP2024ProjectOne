@@ -35,6 +35,7 @@
 
     <script>
         let characters = []; // Array to manage multiple characters
+        let currentCharacterIndex = 0; // Track current player's turn
 
         function initializeGame() {
             const outputDiv = document.getElementById('gameOutput');
@@ -45,18 +46,49 @@
 
         function createCharacters() {
             const numCharacters = parseInt(document.getElementById('numCharacters').value, 10);
-            const outputDiv = document.getElementById('gameOutput');
-            outputDiv.innerHTML = '';
             for (let i = 0; i < numCharacters; i++) {
                 const name = prompt(`Enter name for character #${i + 1}:`);
-                const newCharacter = createCharacter(name);
-                characters.push(newCharacter);
-                outputDiv.innerHTML += `<p>Character Created: ${newCharacter.name}</p>`;
-                outputDiv.innerHTML += `<p>Stats: ${displayStats(newCharacter.stats)}</p>`;
-                outputDiv.innerHTML += `<p>Capacity: Mana - ${newCharacter.capacity.Mana}, Stamina - ${newCharacter.capacity.Stamina}, Psy - ${newCharacter.capacity.Psy}</p>`;
-                outputDiv.innerHTML += `<button onclick="rest(${i})">Rest</button>`;
-                outputDiv.innerHTML += `<button onclick="quitGame(${i})">Quit Game</button><br>`;
+                characters.push(createCharacter(name));
             }
+            displayCurrentCharacter();
+        }
+
+        function displayCurrentCharacter() {
+            const character = characters[currentCharacterIndex];
+            const outputDiv = document.getElementById('gameOutput');
+            outputDiv.innerHTML = `<p>It's ${character.name}'s turn:</p>`;
+            outputDiv.innerHTML += `<p>Stats: ${displayStats(character.stats)}</p>`;
+            outputDiv.innerHTML += `<p>Capacity: Mana - ${character.capacity.Mana}, Stamina - ${character.capacity.Stamina}, Psy - ${character.capacity.Psy}</p>`;
+            outputDiv.innerHTML += `<button onclick="rest()">Rest</button>`;
+            outputDiv.innerHTML += `<button onclick="quitGame()">Quit Game</button>`;
+        }
+
+        function rest() {
+            const character = characters[currentCharacterIndex];
+            Object.values(character.stats).forEach(stat => {
+                stat.value += Math.floor(Math.random() * 3) + 1;
+            });
+            alert(`${character.name} has rested and gained strength.`);
+            nextTurn();
+        }
+
+        function quitGame() {
+            alert(`${characters[currentCharacterIndex].name} has left the game.`);
+            characters.splice(currentCharacterIndex, 1);
+            if (characters.length === 0) {
+                const outputDiv = document.getElementById('gameOutput');
+                outputDiv.innerHTML = '<p>All characters have left. The game is now over.</p>';
+            } else {
+                if (currentCharacterIndex >= characters.length) {
+                    currentCharacterIndex = 0; // Reset index if it exceeds current array length
+                }
+                displayCurrentCharacter();
+            }
+        }
+
+        function nextTurn() {
+            currentCharacterIndex = (currentCharacterIndex + 1) % characters.length;
+            displayCurrentCharacter();
         }
 
         function createCharacter(name) {
@@ -91,30 +123,6 @@
 
         function displayStats(stats) {
             return Object.values(stats).map(stat => `${stat.name}: ${stat.value}`).join(', ');
-        }
-
-        function rest(characterIndex) {
-            const character = characters[characterIndex];
-            Object.values(character.stats).forEach(stat => {
-                stat.value += Math.floor(Math.random() * 3) + 1;
-            });
-            alert(`${character.name} has rested and gained strength.`);
-            updateCharacterDisplay(characterIndex);
-        }
-
-        function updateCharacterDisplay(characterIndex) {
-            const character = characters[characterIndex];
-            const outputDiv = document.getElementById('gameOutput');
-            outputDiv.innerHTML += `<p>Updated Stats for ${character.name}: ${displayStats(character.stats)}</p>`;
-        }
-
-        function quitGame(characterIndex) {
-            const character = characters.splice(characterIndex, 1)[0]; // Remove character from array
-            alert(`${character.name} has left the game.`);
-            if (characters.length === 0) {
-                const outputDiv = document.getElementById('gameOutput');
-                outputDiv.innerHTML = '<p>All characters have left. The game is now over.</p>';
-            }
         }
     </script>
 </body>
