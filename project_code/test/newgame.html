@@ -58,7 +58,7 @@
     };
 
     var eatSound = new Audio('90s-game-ui-6-185099.mp3');  // Path to the ding sound
-
+    var deathSound = new Audio('classic_hurt.mp3'); // added this death sound from minecraft hehe
     function getRandomInt(min, max) {
       return Math.floor(Math.random() * (max - min)) + min;
     }
@@ -129,6 +129,7 @@
 
         for (var i = index + 1; i < snake.cells.length; i++) {
           if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+            deathSound.play();
             startGame();
             return;
           }
