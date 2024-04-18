@@ -34,8 +34,8 @@
     </div>
 
     <script>
-        let characters = []; // Array to manage multiple characters
-        let currentCharacterIndex = 0; // Track current player's turn
+        let characters = [];
+        let currentCharacterIndex = 0;
 
         function initializeGame() {
             const outputDiv = document.getElementById('gameOutput');
@@ -59,8 +59,26 @@
             outputDiv.innerHTML = `<p>It's ${character.name}'s turn:</p>`;
             outputDiv.innerHTML += `<p>Stats: ${displayStats(character.stats)}</p>`;
             outputDiv.innerHTML += `<p>Capacity: Mana - ${character.capacity.Mana}, Stamina - ${character.capacity.Stamina}, Psy - ${character.capacity.Psy}</p>`;
+            outputDiv.innerHTML += `<button onclick="explore()">Explore</button>`;
             outputDiv.innerHTML += `<button onclick="rest()">Rest</button>`;
             outputDiv.innerHTML += `<button onclick="quitGame()">Quit Game</button>`;
+        }
+
+        function explore() {
+            const character = characters[currentCharacterIndex];
+            const success = Math.random() < 0.5; // Simplified success check
+            if (success) {
+                character.experience += 5; // Arbitrary experience gain
+                alert(`${character.name} explored successfully and gained experience!`);
+                if (character.experience >= 10) {
+                    character.level++;
+                    character.experience -= 10;
+                    alert(`${character.name} has leveled up to level ${character.level}!`);
+                }
+            } else {
+                alert(`${character.name} failed to explore successfully.`);
+            }
+            nextTurn();
         }
 
         function rest() {
