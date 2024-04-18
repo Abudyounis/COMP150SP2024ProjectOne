@@ -77,11 +77,10 @@
         maxCells: 4
     };
     var apple = {
-        x: getRandomInt(0, 25) * grid,
-        y: getRandomInt(0, 25) * grid,
+        x: 0,
+        y: 0,
         color: 'red'
     };
-    var nextDirection = null;
 
     var rainbowApple = {
         x: 0,
@@ -100,6 +99,7 @@
     var eatSound = new Audio('90s-game-ui-6-185099.mp3');
     var alternateEatSound = new Audio('ding-36029.mp3');
     var deathSound = new Audio('classic_hurt.mp3');
+    var woohoo = new Audio('Cartoon-woohoo.mp3');
 
     function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min)) + min;
@@ -134,22 +134,18 @@
         timerInterval = setInterval(updateTimer, 1000);
         rainbowAppleInterval = setInterval(trySpawnRainbowApple, 1000);
 
-        function loop() {
-            requestAnimationFrameId = requestAnimationFrame(loop);
-            updateRainbowColor();
-            if (++frameCounter >= 5) {
-                if (nextDirection) {
-                    snake.dx = nextDirection.dx;
-                    snake.dy = nextDirection.dy;
-                    nextDirection = null;
-                }
-                updateGame();
-                frameCounter = 0;
-            }
-        }
-        loop();
+        requestAnimationFrameId = requestAnimationFrame(gameLoop);
         document.getElementById('pauseButton').style.display = 'inline';
         document.getElementById('resumeButton').style.display = 'none';
+    }
+
+    function gameLoop() {
+        updateRainbowColor();
+        if (++frameCounter >= 5) {
+            updateGame();
+            frameCounter = 0;
+        }
+        requestAnimationFrameId = requestAnimationFrame(gameLoop);
     }
 
     function updateGame() {
@@ -233,11 +229,11 @@
                 rainbowApple.g += 5;
             } else if (rainbowApple.g === 255 && rainbowApple.b === 0 && rainbowApple.r > 0) {
                 rainbowApple.r -= 5;
-            } else if (rainbowApple.r === 0 && rainbowApple.g === 255 and rainbowApple.b < 255) {
+            } else if (rainbowApple.r === 0 && rainbowApple.g === 255 && rainbowApple.b < 255) {
                 rainbowApple.b += 5;
-            } else if (rainbowApple.b === 255 and rainbowApple.r === 0 and rainbowApple.g > 0) {
+            } else if (rainbowApple.b === 255 && rainbowApple.r === 0 && rainbowApple.g > 0) {
                 rainbowApple.g -= 5;
-            } else if (rainbowApple.g === 0 and rainbowApple.b === 255 and rainbowApple.r < 255) {
+            } else if (rainbowApple.g === 0 && rainbowApple.b === 255 && rainbowApple.r < 255) {
                 rainbowApple.r += 5;
             } else if (rainbowApple.r === 255 and rainbowApple.g === 0 and rainbowApple.b > 0) {
                 rainbowApple.b -= 5;
@@ -277,13 +273,17 @@
 
     document.addEventListener('keydown', function(e) {
         if (e.keyCode === 37 && snake.dx === 0) {  // Left arrow key
-            nextDirection = {dx: -grid, dy: 0};
+            snake.dx = -grid;
+            snake.dy = 0;
         } else if (e.keyCode === 38 && snake.dy === 0) {  // Up arrow key
-            nextDirection = {dx: 0, dy: -grid};
+            snake.dy = -grid;
+            snake.dx = 0;
         } else if (e.keyCode === 39 && snake.dx === 0) {  // Right arrow key
-            nextDirection = {dx: grid, dy: 0};
+            snake.dx = grid;
+            snake.dy = 0;
         } else if (e.keyCode === 40 && snake.dy === 0) {  // Down arrow key
-            nextDirection = {dx: 0, dy: grid};
+            snake.dy = grid;
+            snake.dx = 0;
         }
     });
   </script>
