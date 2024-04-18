@@ -55,10 +55,12 @@
 
         function createCharacters() {
             const numCharacters = parseInt(document.getElementById('numCharacters').value, 10);
+            characters = [];
             for (let i = 0; i < numCharacters; i++) {
                 const name = prompt(`Enter name for character #${i + 1}:`);
                 characters.push(createCharacter(name));
             }
+            currentCharacterIndex = 0;
             displayCurrentCharacter();
         }
 
@@ -67,6 +69,7 @@
                 document.getElementById('gameOutput').innerHTML = 'All characters have left. The game is now over.';
                 return;
             }
+
             const character = characters[currentCharacterIndex];
             const outputDiv = document.getElementById('gameOutput');
             outputDiv.innerHTML = `<p>It's ${character.name}'s turn:</p>`;
@@ -75,13 +78,18 @@
             outputDiv.innerHTML += `<button onclick="explore()">Explore</button>`;
             outputDiv.innerHTML += `<button onclick="rest()">Rest</button>`;
             outputDiv.innerHTML += `<button onclick="quitGame()">Quit Game</button>`;
+
+            if (character.successful_quests.size === locations.length) {
+                outputDiv.innerHTML += `<p>All quests have been fulfilled by ${character.name}!</p>`;
+            }
         }
 
         function explore() {
             const character = characters[currentCharacterIndex];
             const availableLocations = locations.filter(loc => !character.attempted_quests.has(loc.name));
+
             if (availableLocations.length === 0) {
-                alert('No available locations to explore. You must rest or quit.');
+                alert('No more locations to explore. Please rest to reset your quests.');
                 return;
             }
 
@@ -104,21 +112,13 @@
             nextTurn();
         }
 
-        function meetRequirements(character, requirements) {
-            for (let key in requirements) {
-                if (character.capacity[key] < requirements[key] || (character.stats[key] && character.stats[key].value < requirements[key])) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
         function rest() {
             const character = characters[currentCharacterIndex];
+            character.attempted_quests.clear();  // Reset quests on rest
             Object.values(character.stats).forEach(stat => {
                 stat.value += Math.floor(Math.random() * 3) + 1;
             });
-            alert(`${character.name} has rested and gained strength.`);
+            alert(`${character.name} has rested and reset their quests. They are stronger now.`);
             nextTurn();
         }
 
@@ -142,7 +142,7 @@
 
         function createCharacter(name) {
             let legacyPoints = Math.floor(Math.random() * 51);
-            const newCharacter = {
+            return {
                 name: name,
                 level: 1,
                 experience: 0,
@@ -166,7 +166,6 @@
                 attempted_quests: new Set(),
                 successful_quests: new Set()
             };
-            return newCharacter;
         }
 
         function randomStat(name, legacyPoints) {
