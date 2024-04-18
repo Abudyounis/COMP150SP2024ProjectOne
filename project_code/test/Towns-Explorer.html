@@ -23,6 +23,10 @@
             padding: 10px 20px;
             font-size: 16px;
         }
+        input[type="number"] {
+            padding: 5px;
+            width: 50px;
+        }
     </style>
 </head>
 <body>
@@ -36,6 +40,11 @@
     <script>
         let characters = [];
         let currentCharacterIndex = 0;
+        let locations = [
+            { name: "Blacksmith", description: "a place where weapons are made", requirements: { "Stamina": 13, "Strength": 5, "Endurance": 5, "Vitality": 5 } },
+            { name: "Castle", description: "the residence of the king", requirements: { "Psy": 14, "Wisdom": 5, "Intelligence": 5, "Knowledge": 5 } },
+            { name: "Mysterious Forest", description: "a forest full of secrets", requirements: { "Mana": 15, "Dexterity": 5, "Spirit": 5, "Willpower": 5 } }
+        ];
 
         function initializeGame() {
             const outputDiv = document.getElementById('gameOutput');
@@ -54,6 +63,10 @@
         }
 
         function displayCurrentCharacter() {
+            if (characters.length === 0) {
+                document.getElementById('gameOutput').innerHTML = 'All characters have left. The game is now over.';
+                return;
+            }
             const character = characters[currentCharacterIndex];
             const outputDiv = document.getElementById('gameOutput');
             outputDiv.innerHTML = `<p>It's ${character.name}'s turn:</p>`;
@@ -66,19 +79,38 @@
 
         function explore() {
             const character = characters[currentCharacterIndex];
-            const success = Math.random() < 0.5; // Simplified success check
+            const availableLocations = locations.filter(loc => !character.attempted_quests.has(loc.name));
+            if (availableLocations.length === 0) {
+                alert('No available locations to explore. You must rest or quit.');
+                return;
+            }
+
+            const location = availableLocations[Math.floor(Math.random() * availableLocations.length)];
+            const success = meetRequirements(character, location.requirements);
+            character.attempted_quests.add(location.name);
+
             if (success) {
-                character.experience += 5; // Arbitrary experience gain
-                alert(`${character.name} explored successfully and gained experience!`);
+                character.experience += 5;
+                character.successful_quests.add(location.name);
+                alert(`Success at ${location.name}! ${character.name} gains experience.`);
                 if (character.experience >= 10) {
                     character.level++;
                     character.experience -= 10;
                     alert(`${character.name} has leveled up to level ${character.level}!`);
                 }
             } else {
-                alert(`${character.name} failed to explore successfully.`);
+                alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions.`);
             }
             nextTurn();
+        }
+
+        function meetRequirements(character, requirements) {
+            for (let key in requirements) {
+                if (character.capacity[key] < requirements[key] || (character.stats[key] && character.stats[key].value < requirements[key])) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         function rest() {
@@ -94,14 +126,13 @@
             alert(`${characters[currentCharacterIndex].name} has left the game.`);
             characters.splice(currentCharacterIndex, 1);
             if (characters.length === 0) {
-                const outputDiv = document.getElementById('gameOutput');
-                outputDiv.innerHTML = '<p>All characters have left. The game is now over.</p>';
-            } else {
-                if (currentCharacterIndex >= characters.length) {
-                    currentCharacterIndex = 0; // Reset index if it exceeds current array length
-                }
-                displayCurrentCharacter();
+                document.getElementById('gameOutput').innerHTML = 'All characters have left. The game is now over.';
+                return;
             }
+            if (currentCharacterIndex >= characters.length) {
+                currentCharacterIndex = 0; // Reset index if it exceeds current array length
+            }
+            displayCurrentCharacter();
         }
 
         function nextTurn() {
@@ -111,7 +142,7 @@
 
         function createCharacter(name) {
             let legacyPoints = Math.floor(Math.random() * 51);
-            return {
+            const newCharacter = {
                 name: name,
                 level: 1,
                 experience: 0,
@@ -131,8 +162,11 @@
                     Mana: Math.floor(Math.random() * 11) + 10,
                     Stamina: Math.floor(Math.random() * 11) + 10,
                     Psy: Math.floor(Math.random() * 11) + 10
-                }
+                },
+                attempted_quests: new Set(),
+                successful_quests: new Set()
             };
+            return newCharacter;
         }
 
         function randomStat(name, legacyPoints) {
