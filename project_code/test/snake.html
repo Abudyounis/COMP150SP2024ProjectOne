@@ -238,6 +238,23 @@
             document.getElementById('pauseButton').style.display = 'inline';
         }
     });
-</script>
+
+    document.addEventListener('keydown', function(e) {
+        // Ensure proper movement and prevent the snake from reversing onto itself
+        if (e.keyCode === 37 && snake.dx === 0) {  // Left arrow key
+            snake.dx = -grid;
+            snake.dy = 0;
+        } else if (e.keyCode === 38 && snake.dy === 0) {  // Up arrow key
+            snake.dy = -grid;
+            snake.dx = 0;
+        } else if (e.keyCode === 39 && snake.dx === 0) {  // Right arrow key
+            snake.dx = grid;
+            snake.dy = 0;
+        } else if (e.keyCode === 40 && snake.dy === 0) {  // Down arrow key
+            snake.dy = grid;
+            snake.dx = 0;
+        }
+    });
+  </script>
 </body>
 </html>
