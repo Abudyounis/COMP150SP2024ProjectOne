@@ -66,160 +66,197 @@
     var grid = 16;
     var requestAnimationFrameId = null;
     var frameCounter = 0;
-    var startTime, timerInterval;
+    var startTime, timerInterval, rainbowAppleInterval;
 
     var snake = {
-      x: 160,
-      y: 160,
-      dx: grid,
-      dy: 0,
-      cells: [],
-      maxCells: 4
+        x: 160,
+        y: 160,
+        dx: grid,
+        dy: 0,
+        cells: [],
+        maxCells: 4
     };
     var apple = {
-      x: 320,
-      y: 320
+        x: getRandomInt(0, 25) * grid,
+        y: getRandomInt(0, 25) * grid,
+        color: 'red'
+    };
+
+    var rainbowApple = {
+        x: 0,
+        y: 0,
+        color: 'rainbow',
+        active: false
     };
 
     var eatSound = new Audio('90s-game-ui-6-185099.mp3');
     var alternateEatSound = new Audio('ding-36029.mp3');
     var deathSound = new Audio('classic_hurt.mp3');
+    var woohoo = new Audio('Cartoon-woohoo.mp3');
+
 
     function getRandomInt(min, max) {
-      return Math.floor(Math.random() * (max - min)) + min;
+        return Math.floor(Math.random() * (max - min)) + min;
     }
 
     function playEatSound() {
-      if (!eatSound.paused) {
-        alternateEatSound.play();
-      } else {
-        eatSound.play();
-      }
+        if (!eatSound.paused) {
+            alternateEatSound.play();
+        } else {
+            eatSound.play();
+        }
     }
 
     function startGame() {
-      if (requestAnimationFrameId) {
-        cancelAnimationFrame(requestAnimationFrameId);
-      }
-      snake.x = 160;
-      snake.y = 160;
-      snake.dx = grid;
-      snake.dy = 0;
-      snake.cells = [];
-      snake.maxCells = 4;
-      apple.x = getRandomInt(0, 25) * grid;
-      apple.y = getRandomInt(0, 25) * grid;
-
-      startTime = Date.now();
-      updateTimer();
-      timerInterval = setInterval(updateTimer, 1000);
-
-      function loop() {
-        requestAnimationFrameId = requestAnimationFrame(loop);
-        if (++frameCounter >= 5) {
-          updateGame();
-          frameCounter = 0;
+        if (requestAnimationFrameId) {
+            cancelAnimationFrame(requestAnimationFrameId);
         }
-      }
-      loop();
-      document.getElementById('pauseButton').style.display = 'inline';
-      document.getElementById('resumeButton').style.display = 'none';
+        snake.x = 160;
+        snake.y = 160;
+        snake.dx = grid;
+        snake.dy = 0;
+        snake.cells = [];
+        snake.maxCells = 4;
+
+        apple.x = getRandomInt(0, 25) * grid;
+        apple.y = getRandomInt(0, 25) * grid;
+        apple.color = 'red';
+
+        startTime = Date.now();
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+        rainbowAppleInterval = setInterval(trySpawnRainbowApple, 1000);
+
+        function loop() {
+            requestAnimationFrameId = requestAnimationFrame(loop);
+            if (++frameCounter >= 5) {
+                updateGame();
+                frameCounter = 0;
+            }
+        }
+        loop();
+        document.getElementById('pauseButton').style.display = 'inline';
+        document.getElementById('resumeButton').style.display = 'none';
     }
 
     function updateGame() {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      snake.x += snake.dx;
-      snake.y += snake.dy;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        snake.x += snake.dx;
+        snake.y += snake.dy;
 
-      if (snake.x < 0) {
-        snake.x = canvas.width - grid;
-      } else if (snake.x >= canvas.width) {
-        snake.x = 0;
-      }
-
-      if (snake.y < 0) {
-        snake.y = canvas.height - grid;
-      } else if (snake.y >= canvas.height) {
-        snake.y = 0;
-      }
-
-      snake.cells.unshift({x: snake.x, y: snake.y});
-      if (snake.cells.length > snake.maxCells) {
-        snake.cells.pop();
-      }
-
-      context.fillStyle = 'red';
-      context.fillRect(apple.x, apple.y, grid-1, grid-1);
-      context.fillStyle = 'yellow';
-      snake.cells.forEach(function(cell, index) {
-        context.fillRect(cell.x, cell.y, grid-1, grid-1);
-
-        if (cell.x === apple.x && cell.y === apple.y) {
-          snake.maxCells++;
-          apple.x = getRandomInt(0, 25) * grid;
-          apple.y = getRandomInt(0, 25) * grid;
-          playEatSound();
+        if (snake.x < 0) {
+            snake.x = canvas.width - grid;
+        } else if (snake.x >= canvas.width) {
+            snake.x = 0;
         }
 
-        for (var i = index + 1; i < snake.cells.length; i++) {
-          if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-            deathSound.play();
-            clearInterval(timerInterval);
-            startGame();
-            return;
-          }
+        if (snake.y < 0) {
+            snake.y = canvas.height - grid;
+        } else if (snake.y >= canvas.height) {
+            snake.y = 0;
         }
-      });
+
+        snake.cells.unshift({x: snake.x, y: snake.y});
+        if (snake.cells.length > snake.maxCells) {
+            snake.cells.pop();
+        }
+
+        context.fillStyle = apple.color;
+        context.fillRect(apple.x, apple.y, grid-1, grid-1);
+
+        if (rainbowApple.active) {
+            context.fillStyle = 'magenta';  // Using a solid color for visibility; gradients require a different approach
+            context.fillRect(rainbowApple.x, rainbowApple.y, grid-1, grid-1);
+        }
+
+        snake.cells.forEach(function(cell, index) {
+            context.fillStyle = 'yellow';
+            context.fillRect(cell.x, cell.y, grid-1, grid-1);
+
+            if (cell.x === apple.x && cell.y === apple.y) {
+                snake.maxCells++;
+                apple.x = getRandomInt(0, 25) * grid;
+                apple.y = getRandomInt(0, 25) * grid;
+                playEatSound();
+            }
+
+            if (rainbowApple.active && cell.x === rainbowApple.x && cell.y === rainbowApple.y) {
+                woohoo.play();
+                snake.maxCells += snake.cells.length; // Double the length of the snake
+                rainbowApple.active = false; // Deactivate the rainbow apple
+                playEatSound();
+            }
+
+            for (var i = index + 1; i < snake.cells.length; i++) {
+                if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+                    deathSound.play();
+                    clearInterval(timerInterval);
+                    clearInterval(rainbowAppleInterval);
+                    startGame();
+                    return;
+                }
+            }
+        });
     }
 
     function updateTimer() {
-      var elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-      document.getElementById('timer').textContent = 'Time: ' + elapsedTime + 's';
+        var elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('timer').textContent = 'Time: ' + elapsedTime + 's';
+    }
+
+    function trySpawnRainbowApple() {
+        if (!rainbowApple.active && Math.random() < 0.05) {
+            rainbowApple.x = getRandomInt(0, 25) * grid;
+            rainbowApple.y = getRandomInt(0, 25) * grid;
+            rainbowApple.active = true;
+        }
     }
 
     document.getElementById('startButton').addEventListener('click', startGame);
     document.getElementById('pauseButton').addEventListener('click', function() {
-      if (requestAnimationFrameId) {
-        cancelAnimationFrame(requestAnimationFrameId);
-        clearInterval(timerInterval);
-        requestAnimationFrameId = null;
-        document.getElementById('pauseButton').style.display = 'none';
-        document.getElementById('resumeButton').style.display = 'inline';
-      }
+        if (requestAnimationFrameId) {
+            cancelAnimationFrame(requestAnimationFrameId);
+            clearInterval(timerInterval);
+            clearInterval(rainbowAppleInterval);
+            requestAnimationFrameId = null;
+            document.getElementById('pauseButton').style.display = 'none';
+            document.getElementById('resumeButton').style.display = 'inline';
+        }
     });
 
     document.getElementById('resumeButton').addEventListener('click', function() {
-      if (!requestAnimationFrameId) {
-        startTime = Date.now() - (parseInt(document.getElementById('timer').textContent.split(' ')[1], 10) * 1000);
-        timerInterval = setInterval(updateTimer, 1000);
-        function resumeLoop() {
-          requestAnimationFrameId = requestAnimationFrame(resumeLoop);
-          if (++frameCounter >= 5) {
-            updateGame();
-            frameCounter = 0;
-          }
+        if (!requestAnimationFrameId) {
+            startTime = Date.now() - (parseInt(document.getElementById('timer').textContent.split(' ')[1], 10) * 1000);
+            timerInterval = setInterval(updateTimer, 1000);
+            rainbowAppleInterval = setInterval(trySpawnRainbowApple, 1000);
+            function resumeLoop() {
+                requestAnimationFrameId = requestAnimationFrame(resumeLoop);
+                if (++frameCounter >= 5) {
+                    updateGame();
+                    frameCounter = 0;
+                }
+            }
+            resumeLoop();
+            document.getElementById('resumeButton').style.display = 'none';
+            document.getElementById('pauseButton').style.display = 'inline';
         }
-        resumeLoop();
-        document.getElementById('resumeButton').style.display = 'none';
-        document.getElementById('pauseButton').style.display = 'inline';
-      }
     });
 
     document.addEventListener('keydown', function(e) {
-      // Prevent the snake from reversing direction
-      if (e.which === 37 && snake.dx === 0) { // Left arrow key
-        snake.dx = -grid;
-        snake.dy = 0;
-      } else if (e.which === 38 && snake.dy === 0) { // Up arrow key
-        snake.dy = -grid;
-        snake.dx = 0;
-      } else if (e.which === 39 && snake.dx === 0) { // Right arrow key
-        snake.dx = grid;
-        snake.dy = 0;
-      } else if (e.which === 40 && snake.dy === 0) { // Down arrow key
-        snake.dy = grid;
-        snake.dx = 0;
-      }
+        // Ensure proper movement and prevent the snake from reversing onto itself
+        if (e.keyCode === 37 && snake.dx === 0) {  // Left arrow key
+            snake.dx = -grid;
+            snake.dy = 0;
+        } else if (e.keyCode === 38 && snake.dy === 0) {  // Up arrow key
+            snake.dy = -grid;
+            snake.dx = 0;
+        } else if (e.keyCode === 39 && snake.dx === 0) {  // Right arrow key
+            snake.dx = grid;
+            snake.dy = 0;
+        } else if (e.keyCode === 40 && snake.dy === 0) {  // Down arrow key
+            snake.dy = grid;
+            snake.dx = 0;
+        }
     });
   </script>
 </body>
