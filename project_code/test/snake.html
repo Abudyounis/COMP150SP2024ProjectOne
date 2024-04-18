@@ -77,8 +77,16 @@
       maxCells: 4
     };
     var apple = {
-      x: 320,
-      y: 320
+      x: getRandomInt(0, 25) * grid,
+      y: getRandomInt(0, 25) * grid,
+      color: 'red'
+    };
+
+    var rainbowApple = {
+      x: 0,
+      y: 0,
+      color: 'rainbow',
+      active: false
     };
 
     var eatSound = new Audio('90s-game-ui-6-185099.mp3');
@@ -107,8 +115,18 @@
       snake.dy = 0;
       snake.cells = [];
       snake.maxCells = 4;
+
       apple.x = getRandomInt(0, 25) * grid;
       apple.y = getRandomInt(0, 25) * grid;
+      apple.color = 'red';
+
+      if (Math.random() < 0.15) {
+        rainbowApple.x = getRandomInt(0, 25) * grid;
+        rainbowApple.y = getRandomInt(0, 25) * grid;
+        rainbowApple.active = true;
+      } else {
+        rainbowApple.active = false;
+      }
 
       startTime = Date.now();
       updateTimer();
@@ -148,16 +166,28 @@
         snake.cells.pop();
       }
 
-      context.fillStyle = 'red';
+      context.fillStyle = apple.color;
       context.fillRect(apple.x, apple.y, grid-1, grid-1);
-      context.fillStyle = 'yellow';
+
+      if (rainbowApple.active) {
+        context.fillStyle = 'linear-gradient(red, orange, yellow, green, blue, indigo, violet)';
+        context.fillRect(rainbowApple.x, rainbowApple.y, grid-1, grid-1);
+      }
+
       snake.cells.forEach(function(cell, index) {
+        context.fillStyle = 'yellow';
         context.fillRect(cell.x, cell.y, grid-1, grid-1);
 
         if (cell.x === apple.x && cell.y === apple.y) {
           snake.maxCells++;
           apple.x = getRandomInt(0, 25) * grid;
           apple.y = getRandomInt(0, 25) * grid;
+          playEatSound();
+        }
+
+        if (rainbowApple.active && cell.x === rainbowApple.x && cell.y === rainbowApple.y) {
+          snake.maxCells += snake.maxCells; // Double the length of the snake
+          rainbowApple.active = false; // Deactivate the rainbow apple
           playEatSound();
         }
 
@@ -205,22 +235,6 @@
       }
     });
 
-    document.addEventListener('keydown', function(e) {
-      // Prevent the snake from reversing direction
-      if (e.which === 37 && snake.dx === 0) { // Left arrow key
-        snake.dx = -grid;
-        snake.dy = 0;
-      } else if (e.which === 38 && snake.dy === 0) { // Up arrow key
-        snake.dy = -grid;
-        snake.dx = 0;
-      } else if (e.which === 39 && snake.dx === 0) { // Right arrow key
-        snake.dx = grid;
-        snake.dy = 0;
-      } else if (e.which === 40 && snake.dy === 0) { // Down arrow key
-        snake.dy = grid;
-        snake.dx = 0;
-      }
-    });
   </script>
 </body>
 </html>
