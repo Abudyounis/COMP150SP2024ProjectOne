@@ -34,34 +34,70 @@
     </div>
 
     <script>
+        let characters = []; // Using an array to manage multiple characters
+
         function startGame() {
             const outputDiv = document.getElementById('gameOutput');
-            outputDiv.innerHTML = `<p>Creating your character...</p>`;
-            
-            setTimeout(() => {
-                const character = {
-                    name: "Hero",
-                    level: 1,
-                    experience: 0,
-                    strength: Math.floor(Math.random() * 10) + 1,
-                    intelligence: Math.floor(Math.random() * 10) + 1
-                };
-
-                outputDiv.innerHTML += `<p>Character Created: ${character.name}</p>`;
-                outputDiv.innerHTML += `<p>Strength: ${character.strength}, Intelligence: ${character.intelligence}</p>`;
-                outputDiv.innerHTML += `<p>What would you like to do next?</p>`;
-                outputDiv.innerHTML += `<button onclick="explore()">Explore</button> <button onclick="rest()">Rest</button>`;
-            }, 1000);
+            const newCharacter = createCharacter("Hero" + (characters.length + 1)); // Create unique names for demonstration
+            characters.push(newCharacter); // Add new character to array
+            outputDiv.innerHTML = `<p>Character Created: ${newCharacter.name}</p>`;
+            outputDiv.innerHTML += `<p>Stats: ${displayStats(newCharacter.stats)}</p>`;
+            outputDiv.innerHTML += `<p>Capacity: Mana - ${newCharacter.capacity.Mana}, Stamina - ${newCharacter.capacity.Stamina}, Psy - ${newCharacter.capacity.Psy}</p>`;
+            outputDiv.innerHTML += `<button onclick="rest(${characters.length - 1})">Rest</button>`;
+            outputDiv.innerHTML += `<button onclick="quitGame(${characters.length - 1})">Quit Game</button>`;
         }
 
-        function explore() {
-            const outputDiv = document.getElementById('gameOutput');
-            outputDiv.innerHTML += `<p>You are exploring the ancient dungeons...</p>`;
+        function createCharacter(name) {
+            let legacyPoints = Math.floor(Math.random() * 51);
+            return {
+                name: name,
+                level: 1,
+                experience: 0,
+                stats: {
+                    Strength: randomStat("Strength", legacyPoints),
+                    Dexterity: randomStat("Dexterity", legacyPoints),
+                    Constitution: randomStat("Constitution", legacyPoints),
+                    Vitality: randomStat("Vitality", legacyPoints),
+                    Endurance: randomStat("Endurance", legacyPoints),
+                    Intelligence: randomStat("Intelligence", legacyPoints),
+                    Wisdom: randomStat("Wisdom", legacyPoints),
+                    Knowledge: randomStat("Knowledge", legacyPoints),
+                    Willpower: randomStat("Willpower", legacyPoints),
+                    Spirit: randomStat("Spirit", legacyPoints)
+                },
+                capacity: {
+                    Mana: Math.floor(Math.random() * 11) + 10,
+                    Stamina: Math.floor(Math.random() * 11) + 10,
+                    Psy: Math.floor(Math.random() * 11) + 10
+                }
+            };
         }
 
-        function rest() {
+        function randomStat(name, legacyPoints) {
+            return { name: name, value: Math.floor(Math.random() * 10) + 1 + Math.floor(legacyPoints / 10) };
+        }
+
+        function displayStats(stats) {
+            return Object.values(stats).map(stat => `${stat.name}: ${stat.value}`).join(', ');
+        }
+
+        function rest(characterIndex) {
+            const character = characters[characterIndex];
             const outputDiv = document.getElementById('gameOutput');
-            outputDiv.innerHTML += `<p>You decided to rest and recover your strength.</p>`;
+            Object.values(character.stats).forEach(stat => {
+                stat.value += Math.floor(Math.random() * 3) + 1;
+            });
+            outputDiv.innerHTML += `<p>${character.name} has rested and gained strength.</p>`;
+            outputDiv.innerHTML += `<p>Updated Stats: ${displayStats(character.stats)}</p>`;
+        }
+
+        function quitGame(characterIndex) {
+            const outputDiv = document.getElementById('gameOutput');
+            const character = characters.splice(characterIndex, 1)[0]; // Remove character from array
+            outputDiv.innerHTML += `<p>${character.name} has left the game.</p>`;
+            if (characters.length === 0) {
+                outputDiv.innerHTML += `<p>All characters have left. The game is now over.</p>`;
+            }
         }
     </script>
 </body>
