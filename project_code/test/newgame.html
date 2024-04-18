@@ -16,6 +16,8 @@
     }
     canvas {
       border: 1px solid white;
+      background: url('snake_background.jpg') no-repeat center center;
+      background-size: cover;
     }
     #gameDescription, #controlButtons {
       color: white;
@@ -58,7 +60,7 @@
     };
 
     var eatSound = new Audio('90s-game-ui-6-185099.mp3');  // Path to the ding sound
-    var deathSound = new Audio('classic_hurt.mp3'); // added this death sound from minecraft hehe
+    var deathSound = new Audio('classic_hurt.mp3'); // added this death sound from Minecraft hehe
     function getRandomInt(min, max) {
       return Math.floor(Math.random() * (max - min)) + min;
     }
@@ -116,7 +118,7 @@
       context.fillStyle = 'red';
       context.fillRect(apple.x, apple.y, grid-1, grid-1);
 
-      context.fillStyle = 'green';
+      context.fillStyle = 'yellow';  // Changed snake color for visibility
       snake.cells.forEach(function(cell, index) {
         context.fillRect(cell.x, cell.y, grid-1, grid-1);
 
@@ -172,7 +174,7 @@
       } else if (e.which === 39 && snake.dx === 0) {
         snake.dx = grid;
         snake.dy = 0;
-      } else if (e.which === 40 && snake.dy === 0) {
+      } else if (e.which === 40 and snake.dy === 0) {
         snake.dy = grid;
         snake.dx = 0;
       }
