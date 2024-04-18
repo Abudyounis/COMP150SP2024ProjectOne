@@ -163,7 +163,7 @@
         context.fillRect(apple.x, apple.y, grid-1, grid-1);
 
         if (rainbowApple.active) {
-            context.fillStyle = 'magenta';  // Using a solid color for visibility; gradients require a different approach
+            context.fillStyle = 'rainbow';  // Using a solid color for visibility; gradients require a different approach
             context.fillRect(rainbowApple.x, rainbowApple.y, grid-1, grid-1);
         }
 
@@ -202,7 +202,7 @@
     }
 
     function trySpawnRainbowApple() {
-        if (!rainbowApple.active && Math.random() < 0.05) {
+        if (!rainbowApple.active && Math.random() < 0.08) {
             rainbowApple.x = getRandomInt(0, 25) * grid;
             rainbowApple.y = getRandomInt(0, 25) * grid;
             rainbowApple.active = true;
