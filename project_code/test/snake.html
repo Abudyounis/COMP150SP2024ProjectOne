@@ -92,6 +92,8 @@
     var eatSound = new Audio('90s-game-ui-6-185099.mp3');
     var alternateEatSound = new Audio('ding-36029.mp3');
     var deathSound = new Audio('classic_hurt.mp3');
+    var woohoo = new Audio('Cartoon-woohoo.mp3');
+
 
     function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min)) + min;
@@ -179,6 +181,7 @@
             }
 
             if (rainbowApple.active && cell.x === rainbowApple.x && cell.y === rainbowApple.y) {
+                woohoo.play();
                 snake.maxCells += snake.cells.length; // Double the length of the snake
                 rainbowApple.active = false; // Deactivate the rainbow apple
                 playEatSound();
