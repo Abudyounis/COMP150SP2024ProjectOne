@@ -81,6 +81,8 @@
       y: 320
     };
 
+    var eatSound = new Audio('90s-game-ui-6-185099.mp3');
+    var alternateEatSound = new Audio('ding-36029.mp3');
     var deathSound = new Audio('classic_hurt.mp3');
 
     function getRandomInt(min, max) {
@@ -88,8 +90,11 @@
     }
 
     function playEatSound() {
-      var eatSound = new Audio('90s-game-ui-6-185099.mp3');  // Create a new Audio object each time
-      eatSound.play();
+      if (!eatSound.paused) {
+        alternateEatSound.play();
+      } else {
+        eatSound.play();
+      }
     }
 
     function startGame() {
@@ -200,16 +205,6 @@
       }
     });
 
-    document.addEventListener('keydown', function(e) {
-      // Check that the new direction is not directly opposite to the current direction
-      if ((e.which === 37 || e.which === 39) && snake.dy === 0) { // Left or Right arrow
-        snake.dx = (e.which === 37) ? -grid : grid;
-        snake.dy = 0;
-      } else if ((e.which === 38 || e.which === 40) && snake.dx === 0) { // Up or Down arrow
-        snake.dy = (e.which === 38) ? -grid : grid;
-        snake.dx = 0;
-      }
-    });
   </script>
 </body>
 </html>
