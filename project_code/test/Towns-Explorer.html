@@ -120,16 +120,12 @@ var tree = new Audio('-166806.mp3');
                     alert(`${character.name} has leveled up to level ${character.level}!`);
                 }
                                 
-                if location.name == "Blacksmith"{
-                    //play sound blacksmith
+                 // Play appropriate sound
+                if (location.name === "Blacksmith") { //sound sword
                     sword.play();
-                }
-                else if location.name == "Castle" {
-                //play sound castle
-                king.play();
-                }
-                else {
-                    //play sound myterious forest
+                } else if (location.name === "Castle") { //sound castle
+                    king.play();
+                } else if (location.name === "Mysterious Forest") { //sound tree
                     tree.play();
                 }
             
