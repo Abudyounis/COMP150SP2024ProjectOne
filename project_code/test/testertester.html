@@ -43,167 +43,161 @@
         <div id="gameOutput"></div>
     </div>
 
-    <script>
-        let characters = [];
-        let currentCharacterIndex = 0;
-        let locations = [
-            {
-                name: "Blacksmith",
-                description: "Nestled in the bustling marketplace, the blacksmith's forge blazes in anticipation of crafting legendary weapons.",
-                requirements: { "Stamina": 13, "Strength": 5, "Endurance": 5, "Vitality": 5 },
-                successDescription: "With hammer in hand, you assist the blacksmith in forging a mighty sword, gaining not only skill but also strength.",
-                failDescription: "The heat of the forge proves too much, sapping your strength and yielding no fruit from your labors."
-            },
-            {
-                name: "Castle",
-                description: "The king's majestic castle towers over the land, filled with court intrigues and whispers of ancient secrets.",
-                requirements: { "Psy": 14, "Wisdom": 5, "Intelligence": 5, "Knowledge": 5 },
-                successDescription: "You navigate the political intrigue of the court, earning the king's favor and a pouch of gold coins for your counsel.",
-                failDescription: "Lost in the complex etiquette of the court, you find yourself outmaneuvered by wiser heads, gaining nothing."
-            },
-            {
-                name: "Mysterious Forest",
-                description: "This ancient forest whispers with the voices of the old world, promising secrets to those brave enough to explore its depths.",
-                requirements: { "Mana": 15, "Dexterity": 5, "Spirit": 5, "Willpower": 5 },
-                successDescription: "Guided by the forest spirits, you uncover ancient artifacts buried beneath the mossy earth, enhancing your magic.",
-                failDescription: "The forest cloaks its secrets in shadow and illusion, confusing your senses and leading you astray."
-            }
-        ];
+<script>
+    let characters = [];
+    let currentCharacterIndex = 0;
+    let locations = [
+        {
+            name: "Blacksmith",
+            description: "Nestled in the bustling marketplace, the blacksmith's forge blazes in anticipation of crafting legendary weapons.",
+            requirements: { "Stamina": 13, "Strength": 5, "Endurance": 5, "Vitality": 5 },
+            successDescription: "With hammer in hand, you assist the blacksmith in forging a mighty sword, gaining not only skill but also strength.",
+            failDescription: "The heat of the forge proves too much, sapping your strength and yielding no fruit from your labors.",
+            sound: new Audio('metal-whoosh-hit-10-202176.mp3')
+        },
+        {
+            name: "Castle",
+            description: "The king's majestic castle towers over the land, filled with court intrigues and whispers of ancient secrets.",
+            requirements: { "Psy": 14, "Wisdom": 5, "Intelligence": 5, "Knowledge": 5 },
+            successDescription: "You navigate the political intrigue of the court, earning the king's favor and a pouch of gold coins for your counsel.",
+            failDescription: "Lost in the complex etiquette of the court, you find yourself outmaneuvered by wiser heads, gaining nothing.",
+            sound: new Audio('clash-royale-laugh.mp3')
+        },
+        {
+            name: "Mysterious Forest",
+            description: "This ancient forest whispers with the voices of the old world, promising secrets to those brave enough to explore its depths.",
+            requirements: { "Mana": 15, "Dexterity": 5, "Spirit": 5, "Willpower": 5 },
+            successDescription: "Guided by the forest spirits, you uncover ancient artifacts buried beneath the mossy earth, enhancing your magic.",
+            failDescription: "The forest cloaks its secrets in shadow and illusion, confusing your senses and leading you astray.",
+            sound: new Audio('forest-ambiance-166806.mp3')
+        }
+    ];
 
-        function initializeGame() {
-            const outputDiv = document.getElementById('gameOutput');
-            outputDiv.innerHTML = '<p>How many characters are joining the adventure?</p>';
-            outputDiv.innerHTML += '<input id="numCharacters" type="number" min="1" max="10" value="1">';
-            outputDiv.innerHTML += '<button onclick="createCharacters()">Create Characters</button>';
+    function initializeGame() {
+        const outputDiv = document.getElementById('gameOutput');
+        outputDiv.innerHTML = '<p>How many characters are joining the adventure?</p>';
+        outputDiv.innerHTML += '<input id="numCharacters" type="number" min="1" max="10" value="1">';
+        outputDiv.innerHTML += '<button onclick="createCharacters()">Create Characters</button>';
+    }
+
+    function createCharacters() {
+        const numCharacters = parseInt(document.getElementById('numCharacters').value, 10);
+        for (let i = 0; i < numCharacters; i++) {
+            const name = prompt(`Enter name for character #${i + 1}:`);
+            characters.push(createCharacter(name));
+        }
+        displayCurrentCharacter();
+    }
+
+    function displayCurrentCharacter() {
+        if (characters.length === 0) {
+            document.getElementById('gameOutput').innerHTML = 'All characters have left. The game is now over.';
+            return;
+        }
+        const character = characters[currentCharacterIndex];
+        const outputDiv = document.getElementById('gameOutput');
+        outputDiv.innerHTML = `<p>It's ${character.name}'s turn:</p>`;
+        outputDiv.innerHTML += `<p>Stats: ${displayStats(character.stats)}</p>`;
+        outputDiv.innerHTML += `<p>Capacity: Mana - ${character.capacity.Mana}, Stamina - ${character.capacity.Stamina}, Psy - ${character.capacity.Psy}</p>`;
+        outputDiv.innerHTML += `<button onclick="explore()">Explore</button>`;
+        outputDiv.innerHTML += `<button onclick="rest()">Rest</button>`;
+        outputDiv.innerHTML += `<button onclick="quitGame()">Quit Game</button>`;
+    }
+
+    function explore() {
+        const character = characters[currentCharacterIndex];
+        const availableLocations = locations.filter(loc => !character.successful_quests.has(loc.name));
+        
+        if (availableLocations.length === 0) {
+            alert('All locations have been successfully explored or attempted. You must rest to retry failed attempts or quit.');
+            return;
         }
 
-        function createCharacters() {
-            const numCharacters = parseInt(document.getElementById('numCharacters').value, 10);
-            for (let i = 0; i < numCharacters; i++) {
-                const name = prompt(`Enter name for character #${i + 1}:`);
-                characters.push(createCharacter(name));
-            }
-            displayCurrentCharacter();
-        }
+        const location = availableLocations[Math.floor(Math.random() * availableLocations.length)];
+        const success = meetRequirements(character, location.requirements);
 
-        function displayCurrentCharacter() {
-            if (characters.length === 0) {
-                document.getElementById('gameOutput').innerHTML = 'All characters have left. The game is now over.';
-                return;
+        if (success) {
+            character.experience += 5;
+            character.successful_quests.add(location.name);
+            alert(`Success at ${location.name}! ${character.name} gains experience. ${location.successDescription}`);
+            location.sound.play();
+            if (character.experience >= 10) {
+                character.level++;
+                character.experience -= 10;
+                alert(`${character.name} has leveled up to level ${character.level}!`);
             }
-            const character = characters[currentCharacterIndex];
-            const outputDiv = document.getElementById('gameOutput');
-            outputDiv.innerHTML = `<p>It's ${character.name}'s turn:</p>`;
-            outputDiv.innerHTML += `<p>Stats: ${displayStats(character.stats)}</p>`;
-            outputDiv.innerHTML += `<p>Capacity: Mana - ${character.capacity.Mana}, Stamina - ${character.capacity.Stamina}, Psy - ${character.capacity.Psy}</p>`;
-            outputDiv.innerHTML += `<button onclick="explore()">Explore</button>`;
-            outputDiv.innerHTML += `<button onclick="rest()">Rest</button>`;
-            outputDiv.innerHTML += `<button onclick="quitGame()">Quit Game</button>`;
-        }
-
-        function explore() {
-            const character = characters[currentCharacterIndex];
-            const availableLocations = locations.filter(loc => !character.successful_quests.has(loc.name));
-            if (availableLocations.length === 0) {
-                alert('No available locations to explore. You must rest or quit.');
-                return;
-            }
-
-            const location = availableLocations[Math.floor(Math.random() * availableLocations.length)];
-            const success = meetRequirements(character, location.requirements);
+        } else {
             character.attempted_quests.add(location.name);
-
-            if (success) {
-                character.experience += 5;
-                character.successful_quests.add(location.name);
-                alert(`Success at ${location.name}! ${character.name} gains experience. ${location.successDescription}`);
-                if (character.experience >= 10) {
-                    character.level++;
-                    character.experience -= 10;
-                    alert(`${character.name} has leveled up to level ${character.level}!`);
-                }
-            } else {
-                alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions. ${location.failDescription}`);
-            }
-            nextTurn();
+            alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions. ${location.failDescription}`);
         }
+        nextTurn();
+    }
 
-        function meetRequirements(character, requirements) {
-            for (let key in requirements) {
-                if (character.capacity[key] < requirements[key] || (character.stats[key] && character.stats[key].value < requirements[key])) {
-                    return false;
-                }
-            }
-            return true;
-        }
+    function meetRequirements(character, requirements) {
+        return Object.entries(requirements).every(([key, value]) => character.capacity[key] >= value);
+    }
 
-        function rest() {
-            const character = characters[currentCharacterIndex];
-            Object.values(character.stats).forEach(stat => stat.value += Math.floor(Math.random() * 3) + 1);
-            // Reopen failed attempts after resting
-            character.attempted_quests.forEach((questName) => {
-                if (!character.successful_quests.has(questName)) {
-                    character.attempted_quests.delete(questName);
-                }
-            });
-            alert(`${character.name} has rested and regained strength, ready to face new challenges.`);
-            nextTurn();
-        }
+    function rest() {
+        const character = characters[currentCharacterIndex];
+        character.attempted_quests.clear();  // Clear failed attempts
+        Object.values(character.stats).forEach(stat => stat.value += Math.floor(Math.random() * 3) + 1);
+        alert(`${character.name} has rested and regained strength, ready to retry failed challenges.`);
+        nextTurn();
+    }
 
-        function quitGame() {
-            alert(`${characters[currentCharacterIndex].name} has left the game.`);
-            characters.splice(currentCharacterIndex, 1);
-            if (characters.length === 0) {
-                document.getElementById('gameOutput').innerHTML = 'All characters have left. The game is now over.';
-                return;
-            }
-            if (currentCharacterIndex >= characters.length) {
-                currentCharacterIndex = 0; // Reset index if it exceeds current array length
-            }
-            displayCurrentCharacter();
+    function quitGame() {
+        alert(`${characters[currentCharacterIndex].name} has left the game.`);
+        characters.splice(currentCharacterIndex, 1);
+        if (characters.length === 0) {
+            document.getElementById('gameOutput').innerHTML = 'All characters have left. The game is now over.';
+            return;
         }
+        currentCharacterIndex = currentCharacterIndex % characters.length; // Ensure current index is still valid
+        displayCurrentCharacter();
+    }
 
-        function nextTurn() {
-            currentCharacterIndex = (currentCharacterIndex + 1) % characters.length;
-            displayCurrentCharacter();
-        }
+    function nextTurn() {
+        currentCharacterIndex = (currentCharacterIndex + 1) % characters.length;
+        displayCurrentCharacter();
+    }
 
-        function createCharacter(name) {
-            let legacyPoints = Math.floor(Math.random() * 51);
-            const newCharacter = {
-                name: name,
-                level: 1,
-                experience: 0,
-                stats: {
-                    Strength: randomStat("Strength", legacyPoints),
-                    Dexterity: randomStat("Dexterity", legacyPoints),
-                    Constitution: randomStat("Constitution", legacyPoints),
-                    Vitality: randomStat("Vitality", legacyPoints),
-                    Endurance: randomStat("Endurance", legacyPoints),
-                    Intelligence: randomStat("Intelligence", legacyPoints),
-                    Wisdom: randomStat("Wisdom", legacyPoints),
-                    Knowledge: randomStat("Knowledge", legacyPoints),
-                    Willpower: randomStat("Willpower", legacyPoints),
-                    Spirit: randomStat("Spirit", legacyPoints)
-                },
-                capacity: {
-                    Mana: Math.floor(Math.random() * 11) + 10,
-                    Stamina: Math.floor(Math.random() * 11) + 10,
-                    Psy: Math.floor(Math.random() * 11) + 10
-                },
-                attempted_quests: new Set(),
-                successful_quests: new Set()
-            };
-            return newCharacter;
-        }
+    function createCharacter(name) {
+        let legacyPoints = Math.floor(Math.random() * 51);
+        const newCharacter = {
+            name: name,
+            level: 1,
+            experience: 0,
+            stats: {
+                Strength: randomStat("Strength", legacyPoints),
+                Dexterity: randomStat("Dexterity", legacyPoints),
+                Constitution: randomStat("Constitution", legacyPoints),
+                Vitality: randomStat("Vitality", legacyPoints),
+                Endurance: randomStat("Endurance", legacyPoints),
+                Intelligence: randomStat("Intelligence", legacyPoints),
+                Wisdom: randomStat("Wisdom", legacyPoints),
+                Knowledge: randomStat("Knowledge", legacyPoints),
+                Willpower: randomStat("Willpower", legacyPoints),
+                Spirit: randomStat("Spirit", legacyPoints)
+            },
+            capacity: {
+                Mana: Math.floor(Math.random() * 11) + 10,
+                Stamina: Math.floor(Math.random() * 11) + 10,
+                Psy: Math.floor(Math.random() * 11) + 10
+            },
+            attempted_quests: new Set(),
+            successful_quests: new Set()
+        };
+        return newCharacter;
+    }
 
-        function randomStat(name, legacyPoints) {
-            return { name: name, value: Math.floor(Math.random() * 10) + 1 + Math.floor(legacyPoints / 10) };
-        }
+    function randomStat(name, legacyPoints) {
+        return { name: name, value: Math.floor(Math.random() * 10) + 1 + Math.floor(legacyPoints / 10) };
+    }
 
-        function displayStats(stats) {
-            return Object.values(stats).map(stat => `${stat.name}: ${stat.value}`).join(', ');
-        }
-    </script>
+    function displayStats(stats) {
+        return Object.values(stats).map(stat => `${stat.name}: ${stat.value}`).join(', ');
+    }
+</script>
+
 </body>
 </html>
