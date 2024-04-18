@@ -196,27 +196,17 @@
         }
         resumeLoop();
         document.getElementById('resumeButton').style.display = 'none';
-        document.getElementById('pauseButton').yle.display = 'inline';
+        document.getElementById('pauseButton').style.display = 'inline';
       }
     });
 
     document.addEventListener('keydown', function(e) {
       // Check that the new direction is not directly opposite to the current direction
-      if (e.which === 37 && snake.dx === 0) { // Left arrow
-        if (snake.cells.length > 1 && snake.cells[0].x === snake.cells[1].x) return;
-        snake.dx = -grid;
+      if ((e.which === 37 || e.which === 39) && snake.dy === 0) { // Left or Right arrow
+        snake.dx = (e.which === 37) ? -grid : grid;
         snake.dy = 0;
-      } else if (e.which === 38 && snake.dy === 0) { // Up arrow
-        if (snake.cells.length > 1 && snake.cells[0].y === snake.cells[1].y) return;
-        snake.dy = -grid;
-        snake.dx = 0;
-      } else if (e.which === 39 && snake.dx === 0) { // Right arrow
-        if (snake.cells.length > 1 && snake.cells[0].x === snake.cells[1].x) return;
-        snake.dx = grid;
-        snake.dy = 0;
-      } else if (e.which === 40 && snake.dy === 0) { // Down arrow
-        if (snake.cells.length > 1 && snake.cells[0].y === snake.cells[1].y) return;
-        snake.dy = grid;
+      } else if ((e.which === 38 || e.which === 40) && snake.dx === 0) { // Up or Down arrow
+        snake.dy = (e.which === 38) ? -grid : grid;
         snake.dx = 0;
       }
     });
