@@ -107,9 +107,17 @@ var fail = new Audio('spongebob-fail.mp3');
 function explore() {
     const character = characters[currentCharacterIndex];
     const availableLocations = locations.filter(loc => !character.attempted_quests.has(loc.name));
+
+    // Debugging to see if all locations have been attempted
+    console.log("Available locations:", availableLocations.length);
+    console.log("Successful quests:", character.successful_quests.size);
+    console.log("Total locations:", locations.length);
+
     if (availableLocations.length === 0) {
         if (character.successful_quests.size === locations.length) {
+            console.log("Meeting the Azure Dragon now."); // Debugging
             meetAzureDragon(character);
+            return;
         } else {
             alert('No available locations to explore. You must rest or quit.');
         }
