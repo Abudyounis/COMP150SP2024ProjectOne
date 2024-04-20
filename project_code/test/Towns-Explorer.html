@@ -40,10 +40,11 @@
         <h1>Welcome to the Web-based Towns Explorer Game!</h1>
         <p id="gameDescription">Embark on an adventure filled with lore, mystery, and danger. Click below to begin your journey through the enchanted realms.</p>
         <button onclick="initializeGame()">Start Game</button>
-        <div id="gameOutput"></div>
+        <div id="gameOutput">
+            <img src="arrow.gif" id="failArrow" style="display: none; width: 50px; margin: 10px auto;" alt="Retry Indicator">
+        </div>
     </div>
-    <img src="arrow.gif" id="failArrow" style="display: none; margin-top: 10px;" alt="Retry Indicator">
-
+    
     <script>
         let characters = [];
         let currentCharacterIndex = 0;
@@ -131,10 +132,14 @@ function explore() {
             alert(`${character.name} has leveled up to level ${character.level}!`);
         }
         playLocationSound(location.name);
+        document.getElementById('failArrow').style.display = 'none';
     } else {
         alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions. ${location.failDescription}`);
-        document.getElementById('failArrow').style.display = 'block'; // Show the arrow on fail
         fail.play();
+        document.getElementById('failArrow').style.display = 'block'; // Show the arrow on fail
+        setTimeout(function() {
+            document.getElementById('failArrow').style.display = 'none'; // Hide the arrow after 2 seconds
+        }, 2000);
     }
     nextTurn();
 }
