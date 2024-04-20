@@ -37,15 +37,22 @@
 </head>
 <body>
     <div id="gameContainer">
-        <h1>Welcome to the Web-based Towns Explorer Game!</h1>
-        <p id="gameDescription">Embark on an adventure filled with lore, mystery, and danger. Click below to begin your journey through the enchanted realms.</p>
-        <button onclick="initializeGame()">Start Game</button>
-        <div id="gameOutput">
-            
-        </div>
-        <img src="arrow.gif" id="failArrow" style="display: none; width: 50px; margin: 10px auto;" alt="Retry Indicator">
+    <h1>Welcome to the Web-based Towns Explorer Game!</h1>
+    <p id="gameDescription">Embark on an adventure filled with lore, mystery, and danger. Click below to begin your journey through the enchanted realms.</p>
+    <button onclick="initializeGame()">Start Game</button>
+    <button onclick="showHowToPlay()">How to Play</button>
+    <div id="gameOutput"></div>
+    <img src="arrow.gif" id="failArrow" style="display: none; width: 50px; margin: 10px auto;" alt="Retry Indicator">
     
+    <div id="howToPlayModal" style="display:none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; align-items: center; justify-content: center; display: flex; flex-direction: column; text-align: center;">
+        <div style="padding: 20px; background: rgba(0, 0, 0, 0.75); border-radius: 10px;">
+            <h2>How to Play</h2>
+            <p>Embark on an adventure filled with lore, mystery, and danger. Start by creating your character and then choose quests to attempt. Each location will test different abilities. Failures will require rest before trying again. Succeed to gain experience and level up.</p>
+            <button onclick="hideHowToPlay()">Close</button>
+        </div>
     </div>
+</div>
+
     
     <script>
         let characters = [];
@@ -211,6 +218,13 @@ function conductBattleWithDragon(character, weapon) {
     }
 }
 
+function showHowToPlay() {
+    document.getElementById('howToPlayModal').style.display = 'flex'; // Use flex to center the content
+}
+
+function hideHowToPlay() {
+    document.getElementById('howToPlayModal').style.display = 'none';
+}
 
 function playLocationSound(locationName) {
     if (locationName === "Blacksmith") {
