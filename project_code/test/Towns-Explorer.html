@@ -42,6 +42,7 @@
         <button onclick="initializeGame()">Start Game</button>
         <div id="gameOutput"></div>
     </div>
+    <img src="up-arrow.gif" id="failArrow" style="display: none; margin-top: 10px;" alt="Retry Indicator">
 
     <script>
         let characters = [];
@@ -132,6 +133,7 @@ function explore() {
         playLocationSound(location.name);
     } else {
         alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions. ${location.failDescription}`);
+        document.getElementById('failArrow').style.display = 'block'; // Show the arrow on fail
         fail.play();
     }
     nextTurn();
