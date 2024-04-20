@@ -134,6 +134,7 @@ function explore() {
         playLocationSound(location.name);
         document.getElementById('failArrow').style.display = 'none';
     } else {
+        console.log("Quest failed - showing arrow"); // Debugging output
         alert(`Failed at ${location.name}. ${character.name} needs to rest or try other actions. ${location.failDescription}`);
         fail.play();
         document.getElementById('failArrow').style.display = 'block'; // Show the arrow on fail
@@ -143,6 +144,7 @@ function explore() {
     }
     nextTurn();
 }
+
 
 
 function rest() {
